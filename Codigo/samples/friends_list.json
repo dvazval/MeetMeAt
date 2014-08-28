@@ -1,0 +1,16 @@
+/**
+ * @url /friends/list
+ * @method GET
+ * @notes
+ *  - Solo devuelve mis amigos asociados
+ */
+[
+	{
+		userid: 678,
+		name: 'Diego'
+	},
+	{
+		userid: 980,
+		name: 'Ariana'
+	}
+]

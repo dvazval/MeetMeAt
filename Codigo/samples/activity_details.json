@@ -1,0 +1,15 @@
+/**
+ * @url /activity/details/{id}
+ * @method GET
+ * @param id
+ */
+{
+	activityid: 7,
+	name: 'Bar Copas',
+	foursquare: {
+		id: 'vhyi38yj',
+		lat: -81.9073113,
+		long: -83.5790231
+	},
+	budget: 1000
+}

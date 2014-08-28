@@ -1,0 +1,16 @@
+/**
+ * @url /activity/random
+ * @method GET
+ * @param event-type
+ * @items max 10
+ */
+[
+	{
+		activityid: 7,
+		name: 'Bar Copas'
+	},
+	{
+		activityid: 8,
+		name: 'Club Vertigo'
+	}
+]

@@ -1,0 +1,36 @@
+/**
+ * @url /home/feed
+ * @method GET
+ * @param timestamp (last request timestamp)
+ * @items max 10
+ */
+[
+	{
+		objectid: 'ABC123',
+		type: 'event',
+		data: {
+			title: 'Fiesta',
+			theme: 'Casino',
+			host: {
+				userid: 1234,
+				name: 'Andrey'
+			}
+		}
+	},
+	{
+		objectid: 'DEF456',
+		type: 'photo',
+		data: {
+			url: '/some/path/image.jpg',
+			event: {
+				objectid: 'ABC123',
+				title: 'Fiesta',
+				theme: 'Casino',
+				host: {
+					userid: 1234,
+					name: 'Andrey'
+				}
+			}
+		}
+	}
+]

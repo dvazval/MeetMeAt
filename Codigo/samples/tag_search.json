@@ -1,0 +1,18 @@
+/**
+ * @url /tag/search
+ * @method GET
+ * @param input (user input)
+ * @items max 10 (including suggestions)
+ * @notes
+ *  - Si el input=='' devuelve una lista de 10 tags sugeridos (mas populares?)
+ */
+[
+	{
+		tagid: '1',
+		name: 'Fiesta'
+	},
+	{
+		tagid: '2',
+		name: 'Carnaval'
+	}
+]
