@@ -1,6 +1,0 @@
-http://meetmeat.andreybolanos.com/
-
-Username: meetmeat@andreybolanos.com
-Password: meetmeat2014 
-Server: ftp.andreybolanos.com
-Port: 21

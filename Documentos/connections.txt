@@ -1,0 +1,18 @@
+http://meetmeat.andreybolanos.com/
+
+[FTP]
+
+Username: meetmeat@andreybolanos.com
+Password: meetmeat2014 
+Server: ftp.andreybolanos.com
+Port: 21
+
+[MySQL]
+
+Control Access List (firewall)
+** must provide IP to remote connect **
+
+Username: andreybs_meetme
+Password: meetmeat2014
+Server: localhost
+Database: andreybs_meetmeat
