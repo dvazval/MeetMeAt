@@ -1,0 +1,15 @@
+/**
+ * @url /user/events
+ * @method GET
+ * @security only user events
+ */
+[
+	{
+		eventid: 'GIF444',
+		title: 'Cumpleanos Felipe'
+	}.
+	{
+		eventid: 'AND999',
+		title: 'Cumpleanos Diego'
+	}
+]

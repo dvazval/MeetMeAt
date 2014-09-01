@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="es" ng-app="meetmeat">
+    <head>
+        <meta charset="utf-8" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="format-detection" content="telephone=no" />
+        <meta name="viewport" content="user-scalable=no, initial-scale=1, width=device-width" />
+        <meta name="apple-mobile-web-app-capable" content="yes">
+        <meta name="mobile-web-app-capable" content="yes">
+        <meta name="msapplication-tap-highlight" content="no" />
+        <meta name="keywords" content="">
+        <meta name="description" content="">
+        <meta name="author" content="">
+        <link rel="icon" href="favicon.ico">
+        <!-- Bootstrap -->
+        <link rel="stylesheet" href="css/lib/normalize.css">
+        <link rel="stylesheet" href="css/lib/onsen/onsenui.css">
+        <link rel="stylesheet" href="css/lib/onsen/onsen-css-components.min.css">
+        <link rel="stylesheet" href="css/styles.css">
+        <title>MeetMeAt</title>
+    </head>
+    <body class="no-js">
+
+        <script type="text/javascript">
+            document.body.className = document.body.className.replace("no-js","js");
+        </script>
+
+        <ons-tabbar var="tabbar">
+            <ons-tabbar-item
+                active="true"
+                label="Home"
+                icon="ion-home"
+                page="home.html">
+            </ons-tabbar-item>
+
+            <ons-tabbar-item
+                label="Events"
+                icon="ion-calendar"
+                page="events.html">
+            </ons-tabbar-item>
+        </ons-tabbar>
+
+        <ons-modal var="modal">
+            <ons-icon id="modal-icon" spin="false"></ons-icon>
+            <br><br>
+            <span id="modal-label"></span>
+        </ons-modal>
+
+        <script type="text/ons-template" id="home.html">
+            <ons-navigator var="homeNavigator">
+              <ons-page>
+                <ons-toolbar>
+                    <div class="center">MeetMeAt</div>
+                </ons-toolbar>
+                <div id="home">
+                    <h2>Home</h2>
+                    <div id="home-feed" class="events-list">
+                        Loading...
+                    </div>
+                </div>
+              </ons-page>
+            </ons-navigator>
+        </script>
+
+        <script type="text/ons-template" id="events.html">
+            <ons-navigator var="eventsNavigator">
+                <ons-page>
+                  <ons-toolbar>
+                    <div class="center">MeetMeAt</div>
+                  </ons-toolbar>
+                  <div id="events">
+                    <h2>Eventos</h2>
+                    <div id="my-events-list" class="events-list">
+                        Loading...
+                    <div>
+                  </div>
+                </ons-page>
+            </ons-navigator>
+        </script>
+
+        <script type="text/ons-template" id="event-view.html">
+            <ons-page>
+                <ons-toolbar>
+                    <div class="left"><ons-back-button>Back</ons-back-button></div>
+                    <div class="center">MeetMeAt</div>
+                </ons-toolbar>
+                <div id="event-view">
+                    Loading...
+                </div>
+            </ons-page>
+        </script>
+
+        <!-- Handlebars Templates -->
+        <script type="text/x-handlebars-template" id="events-list-template">
+            {{events-list this}}
+        </script>
+
+        <script type="text/x-handlebars-template" id="event-template">
+            <ons-row>
+                <ons-col>
+                    <div class="event" data-id="{{id}}">
+                        <div class="event-header">
+                            <h2>{{title}}</h2>
+                            <h6>{{theme}}</h6>
+                        </div>
+                        <div class="event-content">
+                            <p>Comienza: {{startTime}}</p>
+                            <p>Termina: {{endTime}}</p>
+                            <p class="description">{{description}}</p>
+                        </div>
+                    </div>
+                </ons-col>
+            </ons-row>
+        </script>
+
+        <!-- Scripts -->
+        <script type="text/javascript"> var app = {}; </script>
+        <script type="text/javascript" src="js/lib/jquery.min.js"></script>
+        <script type="text/javascript" src="js/lib/angular/angular.js"></script>
+        <script type="text/javascript" src="js/lib/onsen/onsenui.min.js"></script>
+        <script type="text/javascript" src="js/lib/handlebars.js"></script>
+        <script type="text/javascript" src="js/app.js"></script>
+        <script type="text/javascript" src="js/components/modal.js"></script>
+        <script type="text/javascript" src="js/models/event.js"></script>
+        <script type="text/javascript" src="js/modules/home.js"></script>
+        <script type="text/javascript" src="js/modules/events.js"></script>
+        <script type="text/javascript" src="js/modules/event-view.js"></script>
+    </body>
+</html>

@@ -1,0 +1,52 @@
+/**
+ * Global styles
+ */
+section {
+	margin: 0;
+	padding: 0;
+}
+
+section + section {
+	padding-top: 15px;
+}
+
+input,
+textarea {
+	width: 100%;
+	display: block;
+}
+
+textarea {
+	min-height: 100px;
+}
+
+small {
+	font-size: 12px;
+	font-weight: bold;
+}
+
+h1,h2,h3,h4,h5,h6 {
+	margin: 0;
+}
+
+h1,h2 {
+	margin-top: 10px;
+}
+
+/**
+ * Onsen UI overwrites
+ **/
+.page__content {
+	padding: 10px;
+}
+
+.row + .row {
+	margin-top: 10px;
+}
+
+/**
+ * @module Events
+ */
+#events .events-list {
+	margin-top: 10px;
+}
