@@ -1,0 +1,23 @@
+/**
+ * @url /event/details/{id}
+ * @method GET
+ * @param id
+ */
+{
+	eventid: 'GIF444',
+	title: 'Cumpleanos Felipe',
+	description: 'Fiesta toda la noche!',
+	theme: 'Brunch',
+	photo: 'url/to/photo.jpg',
+	activities :
+	[
+		{
+			activityid: 7,
+			name: 'Bar Copas'
+		},
+		{
+			activityid: 8,
+			name: 'Club Vertigo'
+		}
+	]
+}
