@@ -21,32 +21,7 @@
             document.body.className = document.body.className.replace("no-js","js");
         </script>
 
-        <ons-tabbar var="tabbar">
-        	<ons-tabbar-item
-                active="true"
-                label="Home"
-                icon="ion-home"
-                page="home.html">
-            </ons-tabbar-item>
-
-            <ons-tabbar-item
-                label="Events"
-                icon="ion-calendar"
-                page="events.html">
-            </ons-tabbar-item>
-
-            <ons-tabbar-item
-                label="Amigos"
-                icon="ion-android-friends"
-                page="friends.html">
-            </ons-tabbar-item>
-
-            <ons-tabbar-item
-                label="Perfil"
-                icon="ion-android-contact"
-                page="profile.html">
-            </ons-tabbar-item>
-        </ons-tabbar>
+        <ons-navigator var="rootNavigator"></ons-navigator>
 
         <ons-modal var="modal">
             <ons-icon id="modal-icon" spin="false"></ons-icon>
@@ -54,66 +29,10 @@
             <span id="modal-label"></span>
         </ons-modal>
 
-        <script type="text/ons-template" id="home.html">
-            <ons-navigator var="homeNavigator">
-              <ons-page>
-                <ons-toolbar>
-                    <div class="center">
-                    	<img src="img/mini-logo.png" />
-                    </div>
-                </ons-toolbar>
-                <div id="home">
-                    <h2>Home</h2>
-                    <div id="home-feed" class="events-list">
-                        Loading...
-                    </div>
-                </div>
-              </ons-page>
-            </ons-navigator>
-        </script>
-
-        <script type="text/ons-template" id="event-view.html">
-            <ons-page>
-                <ons-toolbar>
-                    <div class="left"><ons-back-button>Back</ons-back-button></div>
-                    <div class="center">MeetMeAt</div>
-                </ons-toolbar>
-                <div id="event-view">
-                    Loading...
-                </div>
-            </ons-page>
-        </script>
-
-        <script type="text/x-handlebars-template" id="event-template">
-            <ons-row>
-                <ons-col>
-                    <div class="event" data-id="{{id}}">
-                        <div class="event-header">
-                            <h2>{{title}}</h2>
-                            <h6>{{theme}}</h6>
-                        </div>
-                        <div class="event-content">
-                            <p>Comienza: {{startTime}}</p>
-                            <p>Termina: {{endTime}}</p>
-                            <p class="description">{{description}}</p>
-                        </div>
-                    </div>
-                </ons-col>
-            </ons-row>
-        </script>
-
         <!-- Scripts -->
-        <!-- <script type="text/javascript"> var app = {}; </script>
-        <script type="text/javascript" src="js/lib/jquery.min.js"></script> -->
+        <script type="text/javascript" src="js/lib/jquery.min.js"></script>
         <script type="text/javascript" src="js/lib/angular/angular.js"></script>
         <script type="text/javascript" src="js/lib/onsen/onsenui.min.js"></script>
-        <script type="text/javascript" src="js/angular-app.js"></script>
-        <!-- <script type="text/javascript" src="js/lib/handlebars.js"></script>
         <script type="text/javascript" src="js/app.js"></script>
-        <script type="text/javascript" src="js/components/modal.js"></script>
-        <script type="text/javascript" src="js/models/event.js"></script>
-        <script type="text/javascript" src="js/modules/home.js"></script>
-        <script type="text/javascript" src="js/modules/events.js"></script>
-        <script type="text/javascript" src="js/modules/event-view.js"></script> -->
     </body>
 </html>

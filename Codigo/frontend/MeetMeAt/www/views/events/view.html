@@ -1,0 +1,25 @@
+<ons-page ng-controller="EventViewController">
+    <ons-toolbar>
+        <div class="left"><ons-back-button>Back</ons-back-button></div>
+        <div class="center">
+        	<img src="img/mini-logo.png" />
+        </div>
+    </ons-toolbar>
+    <div id="my-event-view">
+        <ons-row>
+            <ons-col>
+                <div id="event-view" data-id="{{event.id}}">
+                    <div id="event-header">
+                        <h2>{{event.title}}</h2>
+                        <h6>{{event.theme}}</h6>
+                    </div>
+                    <div id="event-content">
+                        <p>Comienza: {{event.startTime}}</p>
+                        <p>Termina: {{event.endTime}}</p>
+                        <p class="description">{{event.description}}</p>
+                    </div>
+                </div>
+            </ons-col>
+        </ons-row>
+    </div>
+</ons-page>

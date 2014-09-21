@@ -5,174 +5,175 @@
 // | |  | |  __/  __/ |_| |  | |  __// ____ \ |_
 // |_|  |_|\___|\___|\__|_|  |_|\___/_/    \_\__|
 
-var app = app || null;
+// dependencies
+var angular = angular || {},
+	ons = ons || {},
+	console = console || {};
 
-(function($){
+// navigator (overwrite on page load)
+var rootNavigator = null;
+
+(function(angular, ons){
 
     'use strict';
 
-    /**
-     * Application
-     */
-    app = {
-    	name : 'meetmeat',
-    	models: {
-    		_m : [],
-    		all : function() {
-    			return this._m;
-    		},
-    		register : function(name,obj) {
-    			this._m[name] = obj;
-    		},
-    		get : function(name) {
-    			return this._m[name];
-    		}
-    	},
-    	modules: {
-    		_m : [],
-    		all : function() {
-    			return this._m;
-    		},
-    		register : function(name,obj,tab) {
-    			this._m[name] = { 'm': obj, 't': tab };
-    		},
-    		get : function(name) {
-    			return this._m[name].m;
-    		},
-    		onTabChange : function(event) {
-    			var tabMod = null;
-    			for (var i in this._m) {
-    				var mod = this._m[i];
-    				if ( mod.t == event.index ) {
-    					tabMod = mod.m;
-    					break;
-    				}
-    			}
-    			if ( tabMod != null ) {
-    				tabMod.initTabbar();
-    			}
-    		}
-    	},
-    	tabs : {
-    		HOME : 0,
-    		EVENTS : 1
-    	},
-    	init : function() {
-    		// Initialize models
-    		var models = this.models.all();
-    		for (var k in models) {
-				var model = this.models.get(k);
-    			model.init();
-    			console.log('Model ' + i + ' Initialized');
-    		}
-    		// Initialize modules
-    		var modules = this.modules.all();
-    		for (var i in modules) {
-    			var module = this.modules.get(i);
-    			module.init();
-    			console.log('Module ' + i + ' Initialized');
-    		}
-    		console.log('Application Initialized');
-    	}
-    };
-
-	/**
-     * Application API
-     */
-    app.api = {
-    	endpoint : 'http://meetmeat.andreybolanos.com/rest/',
-		request : function(url, params) {
-            var promise = $.Deferred();
-			var method = (params && params.method) ? params.method : "GET";
-            //var webservice = this.endpoint + url + '.json';
-            var webservice = this.endpoint + url;
-            console.log('Calling WebService [' + method + ':' + webservice + ']');
-    		$.ajax(webservice, {
-                crossDomain: true,
-    			type: method,
-                dataType: 'json'
-    		})
-    		.done(function(data){
-                promise.resolve(data);
-            })
-    		.fail(function(jqxhr,status,error){
-                promise.reject(jqxhr,error);
-            });
-            return promise;
-    	},
-        row: function(tableName,id) {
-            var promise = $.Deferred();
-            this.request(tableName + '/' + id).then(function(data){
-                promise.resolve(data);
-            },function(jqxhr,error){
-                promise.reject(error);
-            });
-            return promise;
-        },
-        table: function(tableName,callbacks) {
-            var self = this;
-            var promise = $.Deferred();
-            this.request(tableName).then(function(data){
-                var promises = [];
-                $.each(data,function(i,v){
-                    var row = data[i];
-                    var innerPromise = $.Deferred();
-                    self.row(tableName,row.value).then(function(rowData){
-                        callbacks.cacheRow(rowData);
-                        innerPromise.resolve(rowData);
-                    },function(jqxhr,error){
-                        innerPromise.reject(error);
-                    });
-                    promises.push(innerPromise);
-                });
-                $.when.apply($, promises).then(function(){
-                    promise.resolve();
-                });
-            },function(jqxhr,error){
-                if (jqxhr.responseText == "") {
-                    promise.resolve();
-                } else {
-                    promise.reject(error);
-                }
-            });
-            return promise;
-        }
-    };
+	// Initialize Angular
+    var module = angular.module('meetmeat', ['onsen']);
+    module.constant('appName', 'MeetMeAt');
+    module.constant('endpoint', 'http://meetmeat.andreybolanos.com/rest/');
 
     /**
-     * Handlebars Helpers
+     * SERVICES
      */
-    Handlebars.registerHelper('events-list', function(events) {
-        var html = '';
-        html += '<ons-list class="events-list">';
-        if ( events && events.length > 0 ) {
-            for (var i=0; i < events.length; i++) {
-                var event = events[i];
-                var id = event.id;
-                var title = event.title;
-                html += '<ons-list-item class="event-list-item" modifier="tappable" data-id="' + id + '">' + title + '</ons-list-item>';
-            }
-        } else {
-            html += '<ons-list-item>No events</ons-list-item>';
-        }
-        html += '</ons-list>';
-        return new Handlebars.SafeString(html);
+
+   	// Authentication Service
+   	module.factory('AuthenticationService', function() {
+   		var AuthenticationService = {
+   			isLogin : function() {
+   				return true;
+   			},
+   			route : function() {
+   				if (!this.isLogin()) {
+		    		rootNavigator.resetToPage('views/login.html');
+		    	} else {
+		    		rootNavigator.resetToPage('views/main.html');
+		    	}
+   			}
+   		};
+
+   		return AuthenticationService;
+   	});
+
+    // Api Service
+    module.factory('ApiService', function($q, $http, endpoint) {
+    	var ApiService = {
+    		request: function(url, params) {
+    			var method = (params && params.method) ? params.method : "GET",
+    				webservice = endpoint + url;
+    			console.log('Calling WebService [' + method + ':' + webservice + ']');
+    			var promise = $http({method:method, url: webservice}).then(function(response){
+    				return response.data;
+    			});
+    			return promise;
+    		},
+    		get: function(url) {
+    			return this.request(url, { method: 'GET' });
+    		},
+    		getTable: function(name) {
+    			return this.get(name);
+    		},
+    		getRow: function(tableName, id) {
+    			return this.get(tableName + '/' + id);
+    		},
+    		getAll: function(tableName, saveRowCallback) {
+    			var def = $q.defer(),
+    				self = this;
+    			this.getTable(tableName).then(function(data){
+    				var rows = [];
+    				angular.forEach(data, function(obj) {
+    					var id = obj.value;
+    					var idef = self.getRow(tableName, id).then(function(dataRow){
+    						// transform api model to local model
+    						var row = {};
+    						dataRow.map(function(obj){
+    							row[obj.field] = obj.value;
+    						});
+    						dataRow = row;
+    						// return row
+    						saveRowCallback(dataRow);
+    					});
+    					rows.push(idef);
+    				});
+    				$q.all(rows).then(function(){
+						def.resolve();
+					});
+    			});
+    			return def.promise;
+    		}
+    	};
+    	return ApiService;
     });
 
-    // Initialize Angular
-    angular.module(app.name, ['onsen.directives']);
+	// Events service
+    module.factory('EventsService', function($q, ApiService) {
+    	var events = [],
+    		currentEvent = null,
+    		table = 'events';
 
-    // Onsen Ready
-    ons.ready(function() {
-    	// Enable auto margin for the iOS status bar
-    	ons.enableAutoStatusBarFill();
+    	var EventsService = {
+    		addEvent: function(event) {
+    			events.push(event);
+    		},
+    		getEvents: function() {
+    			return events;
+    		},
+    		load: function() {
+    			var self = this;
+    			events = [];
+    			return ApiService.getAll(table, function(event) {
+    				self.addEvent(event);
+    			});
+    		},
+    		setCurrent: function(event) {
+    			currentEvent = event;
+    		},
+    		getCurrent: function() {
+    			return currentEvent;
+    		}
+    	};
 
-    	// Tabbar change event
-    	tabbar.on('postchange',function(event){
-            app.modules.onTabChange.call(app.modules,event);
-        });
-    	// Initialize
-    	app.init();
+    	return EventsService;
     });
 
-}(jQuery));
+    /**
+     * CONTROLLERS
+     */
+
+    // App Controller
+    module.controller('AppController', function($http, AuthenticationService) {
+    	// Setup
+    	// var authToken;
+		// $http.get('/auth.py').success(function(data, status, headers) {
+		// 	authToken = headers('A-Token');
+		// 	$scope.user = data;
+		// });
+    	// $http.defaults.headers.common.Authorization = 'Basic YmVlcDpib29w'
+    	$http.defaults.cache = true;
+
+    	// Show initial view
+    	ons.ready(function(){
+    		AuthenticationService.route();
+    	});
+    });
+
+    // Login
+    module.controller('LoginController', function() {
+    	//
+    });
+
+    // Events list
+	module.controller('EventsListController', function($scope, EventsService) {
+		var navigator = eventsNavigator || null; // jshint ignore:line
+
+		EventsService.load().then(function(){
+			$scope.events = EventsService.getEvents();
+		});
+
+		$scope.viewEvent = function(index) {
+			var event = $scope.events[index];
+			EventsService.setCurrent(event);
+			navigator.pushPage('views/events/view.html', event);
+		};
+	});
+
+	// Event view
+	module.controller('EventViewController', function($scope, EventsService) {
+		$scope.event = EventsService.getCurrent();
+	});
+
+	// Initialize
+	module.run(function() {
+		// Global settings
+	});
+
+})(angular, ons);

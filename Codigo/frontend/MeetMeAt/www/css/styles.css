@@ -36,7 +36,7 @@ h1,h2 {
 /**
  * Onsen UI overwrites
  **/
-.page__content {
+.page__content .page__content {
 	padding: 10px;
 }
 
@@ -47,6 +47,6 @@ h1,h2 {
 /**
  * @module Events
  */
-#events .events-list {
+.events-list {
 	margin-top: 10px;
 }

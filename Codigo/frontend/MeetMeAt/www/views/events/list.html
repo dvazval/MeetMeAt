@@ -5,13 +5,13 @@
 				<img src="img/mini-logo.png" />
 			</div>
 		</ons-toolbar>
-		<div id="events">
+		<div id="my-events-list">
 			<h2>Eventos</h2>
-			<div id="my-events-list" data-ng-init="loadEvents()">
+			<div data-ng-init="loadEvents()">
 				<ons-scroller>
 					<ons-list class="events-list">
-						<ons-list-item class="event-list-item" modifier="tappable" ng-repeat="event in events">
-							 {{event.title}}
+						<ons-list-item class="event-list-item" modifier="tappable" ng-repeat="event in events" ng-click="viewEvent($index)">
+							{{event.title}}
 						</ons-list-item>
 					</ons-list>
 				</ons-scroller>

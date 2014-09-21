@@ -70,7 +70,7 @@ h6 {
   margin-top: -1px;
 }
 ons-toolbar + .page__content {
-  padding-top: 66px;
+  padding-top: 66px !important;
 }
 .content-padded {
   padding: 8px;
@@ -1575,7 +1575,7 @@ ons-toolbar + .page__content {
   font-size: 17px;
   padding: 4px 10px;
   letter-spacing: 0;
-  color: #1284ff;
+  color: #fff;
   text-shadow: 0 1px none;
   vertical-align: baseline;
   background-color: rgba(0,0,0,0);
@@ -1610,7 +1610,7 @@ ons-toolbar + .page__content {
   transition: none;
 }
 .toolbar-button--outline {
-  border: 1px solid #1284ff;
+  border: 1px solid #fff;
   margin: auto 8px;
   padding-left: 6px;
   padding-right: 6px;

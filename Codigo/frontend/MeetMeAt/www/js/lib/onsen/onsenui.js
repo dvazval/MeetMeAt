@@ -6,20 +6,20 @@
 // Inspired by base2 and Prototype
 (function(){
   var initializing = false, fnTest = /xyz/.test(function(){xyz;}) ? /\b_super\b/ : /.*/;
- 
+
   // The base Class implementation (does nothing)
   this.Class = function(){};
- 
+
   // Create a new Class that inherits from this class
   Class.extend = function(prop) {
     var _super = this.prototype;
-   
+
     // Instantiate a base class (but only create the instance,
     // don't run the init constructor)
     initializing = true;
     var prototype = new this();
     initializing = false;
-   
+
     // Copy the properties over onto the new prototype
     for (var name in prop) {
       // Check if we're overwriting an existing function
@@ -28,38 +28,38 @@
         (function(name, fn){
           return function() {
             var tmp = this._super;
-           
+
             // Add a new ._super() method that is the same method
             // but on the super-class
             this._super = _super[name];
-           
+
             // The method only need to be bound temporarily, so we
             // remove it when we're done executing
-            var ret = fn.apply(this, arguments);        
+            var ret = fn.apply(this, arguments);
             this._super = tmp;
-           
+
             return ret;
           };
         })(name, prop[name]) :
         prop[name];
     }
-   
+
     // The dummy class constructor
     function Class() {
       // All construction is actually done in the init method
       if ( !initializing && this.init )
         this.init.apply(this, arguments);
     }
-   
+
     // Populate our constructed prototype object
     Class.prototype = prototype;
-   
+
     // Enforce the constructor to be what we expect
     Class.prototype.constructor = Class;
- 
+
     // And make this class extendable
     Class.extend = arguments.callee;
-   
+
     return Class;
   };
 })();
@@ -2443,7 +2443,7 @@ function IScroll (el, options) {
 
 	this.options = {
 
-// INSERT POINT: OPTIONS 
+// INSERT POINT: OPTIONS
 
 		startX: 0,
 		startY: 0,
@@ -2494,7 +2494,7 @@ function IScroll (el, options) {
 
 // INSERT POINT: NORMALIZATION
 
-	// Some defaults	
+	// Some defaults
 	this.x = 0;
 	this.y = 0;
 	this.directionX = 0;
@@ -3104,7 +3104,7 @@ return IScroll;
 })(window, document, Math);
 /**
  * MicroEvent - to make any js object an event emitter (server or browser)
- * 
+ *
  * - pure javascript - server compatible, browser compatible
  * - dont rely on the browser doms
  * - super simple - you get it immediatly, no mistery, no magic involved
@@ -3213,7 +3213,7 @@ window.Modernizr = (function( window, document, undefined ) {
 
     slice = classes.slice,
 
-    featureName, 
+    featureName,
 
 
     injectElementWithStyles = function( rule, callback, nodes, testnames ) {
@@ -3262,7 +3262,7 @@ window.Modernizr = (function( window, document, undefined ) {
       };
     }
     else {
-      hasOwnProp = function (object, property) { 
+      hasOwnProp = function (object, property) {
         return ((property in object) && is(object.constructor.prototype[property], 'undefined'));
       };
     }
@@ -3449,7 +3449,7 @@ window.Modernizr = (function( window, document, undefined ) {
 
        }
 
-       return Modernizr; 
+       return Modernizr;
      };
 
 
@@ -3854,7 +3854,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         this.PRE_IOS7_VIEWPORT = "initial-scale=1, maximum-scale=1, user-scalable=no";
         this.IOS7_VIEWPORT = "width=device-width, height=device-height, initial-scale=1, maximum-scale=1, user-scalable=no";
         this.DEFAULT_VIEWPORT = "initial-scale=1, maximum-scale=1, user-scalable=no";
-        
+
         this.ensureViewportElement();
         this.platform = {};
         this.platform.name = this.getPlatformName();
@@ -3869,7 +3869,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
             this.viewportElement = document.createElement('meta');
             this.viewportElement.name = "viewport";
             document.head.appendChild(this.viewportElement);
-        }        
+        }
     },
 
     Viewport.prototype.setup = function() {
@@ -3923,8 +3923,8 @@ catch(err) { app = angular.module("templates-main", []); }
 app.run(["$templateCache", function($templateCache) {
   "use strict";
   $templateCache.put("templates/back_button.tpl",
-    "<span class=\"toolbar-button--quiet {{modifierTemplater('toolbar-button--quiet--*')}}\" ng-click=\"$root.ons.findParentComponentUntil('ons-navigator', $event).popPage()\" style=\"height: 44px; line-height: 0; padding: 0; position: relative;\">\n" +
-    "  <i class=\"fa fa-angle-left ons-back-button__icon\" style=\"vertical-align: top; line-height: 44px; font-size: 36px; padding-left: 8px; padding-right: 4px; height: 44px; width: 14px;\"></i><span style=\"vertical-align: top; display: inline-block; line-height: 44px; height: 44px;\" class=\"back-button__label\"></span>\n" +
+    "<span class=\"toolbar-button--quiet {{modifierTemplater('toolbar-button--quiet--*')}}\" ng-click=\"$root.ons.findParentComponentUntil('ons-navigator', $event).popPage()\" style=\"height: 50px; line-height: 0; padding: 0; position: relative;\">\n" +
+    "  <i class=\"fa fa-angle-left ons-back-button__icon\" style=\"vertical-align: top; line-height: 50px; font-size: 36px; padding-left: 8px; padding-right: 4px; height: 50px; width: 14px;\"></i><span style=\"vertical-align: top; display: inline-block; line-height: 50px; height: 50px;\" class=\"back-button__label\"></span>\n" +
     "</span>\n" +
     "");
 }]);
@@ -4627,7 +4627,7 @@ limitations under the License.
           enterPage.getPageView().hasToolbarElement() &&
           leavePage.getPageView().hasToolbarElement();
 
-        var isToolbarNothing = 
+        var isToolbarNothing =
           !enterPage.getPageView().hasToolbarElement() &&
           !leavePage.getPageView().hasToolbarElement();
 
@@ -4665,7 +4665,7 @@ limitations under the License.
               .resetStyle({
                 duration: 0.1,
                 transition:
-                  'background-color 0.1s linear, ' + 
+                  'background-color 0.1s linear, ' +
                   'border-color 0.1s linear'
               }),
 
@@ -4836,7 +4836,7 @@ limitations under the License.
           enterPage.getPageView().hasToolbarElement() &&
           leavePage.getPageView().hasToolbarElement();
 
-        var isToolbarNothing = 
+        var isToolbarNothing =
           !enterPage.getPageView().hasToolbarElement() &&
           !leavePage.getPageView().hasToolbarElement();
 
@@ -5178,7 +5178,7 @@ limitations under the License.
               duration: 0.4,
               timing: 'cubic-bezier(.1, .7, .1, 1)'
             })
-            
+
         );
       }
     });
@@ -5834,7 +5834,7 @@ limitations under the License.
        * Use this method to access options passed by pushPage() or resetToPage() method.
        * eg. ons.navigator.getCurrentPage().options
        *
-       * @return {Object} 
+       * @return {Object}
        */
       getCurrentPage: function() {
         return this.pages[this.pages.length - 1];
@@ -6298,7 +6298,7 @@ limitations under the License.
         if (this._registeredToolbarElement) {
           throw new Error('This page\'s toolbar is already registered.');
         }
-        
+
         element.remove();
         var statusFill = this._element[0].querySelector('.page__status-bar-fill');
         if (statusFill) {
@@ -6977,7 +6977,7 @@ limitations under the License.
       ),
 
       timing: 'cubic-bezier(.1, .7, .4, 1)',
-      duration: 0.3, 
+      duration: 0.3,
       blackMaskOpacity: 0.4,
 
       init: function(options) {
@@ -7285,7 +7285,7 @@ limitations under the License.
   MicroEvent.mixin(SlidingMenuViewModel);
 
   var MAIN_PAGE_RATIO = 0.9;
-  module.factory('SlidingMenuView', ['$onsen', '$compile', 'SlidingMenuAnimator', 'RevealSlidingMenuAnimator', 'PushSlidingMenuAnimator', 'OverlaySlidingMenuAnimator', function($onsen, $compile, SlidingMenuAnimator, RevealSlidingMenuAnimator, 
+  module.factory('SlidingMenuView', ['$onsen', '$compile', 'SlidingMenuAnimator', 'RevealSlidingMenuAnimator', 'PushSlidingMenuAnimator', 'OverlaySlidingMenuAnimator', function($onsen, $compile, SlidingMenuAnimator, RevealSlidingMenuAnimator,
                                              PushSlidingMenuAnimator, OverlaySlidingMenuAnimator) {
 
     var SlidingMenuView = Class.extend({
@@ -7857,7 +7857,7 @@ limitations under the License.
 
   module.factory('SlidingMenuAnimator', function() {
     return Class.extend({
-      
+
       /**
        * @param {jqLite} element "ons-sliding-menu" or "ons-split-view" element
        * @param {jqLite} mainPage
@@ -8104,7 +8104,7 @@ limitations under the License.
             // by width
             if (this._scope.collapse === undefined) {
               return false;
-            } 
+            }
 
             var widthToken;
             if (this._scope.collapse.indexOf('width') >= 0) {
@@ -9198,7 +9198,7 @@ limitations under the License.
     } else {
       classList.push('fa-lg');
     }
-    
+
     // rotate
     if (attrs.rotate === '90' || attrs.rotate === '180' || attrs.rotate === '270') {
       classList.push('ons-icon--rotate-' + attrs.rotate);
@@ -9582,10 +9582,10 @@ limitations under the License.
  * @ngdoc directive
  * @id modal
  * @name ons-modal
- * @description 
+ * @description
  *  [en]Modal component that mask current screen. Underlying components are not noticed from any events while the modal component is shown.[/en]
  *  [ja]画面全体をマスクするモーダル用コンポーネントです。下側にあるコンポーネントは、モーダルが表示されている間はイベント通知が行われません。[/ja]
- * @param var 
+ * @param var
  *  [en]Variable name to refer this modal.[/en]
  *  [ja]このコンポーネントを参照するための変数名を指定します。[/ja]
  * @property toggle()
@@ -9619,7 +9619,7 @@ limitations under the License.
 
       // NOTE: This element must coexists with ng-controller.
       // Do not use isolated scope and template's ng-transclde.
-      scope: false, 
+      scope: false,
       transclude: false,
 
       compile: function(element, attrs) {
@@ -9737,7 +9737,7 @@ limitations under the License.
         return {
           pre: function(scope, element, attrs, controller) {
             var navigator = new NavigatorView({
-              scope: scope, 
+              scope: scope,
               element: element
             });
 
@@ -9837,9 +9837,9 @@ limitations under the License.
     }
 
     function fireActualPageInitEvent(element) {
-      var event = document.createEvent('HTMLEvents');    
+      var event = document.createEvent('HTMLEvents');
       event.initEvent('pageinit', true, true);
-      element.dispatchEvent(event);    
+      element.dispatchEvent(event);
     }
 
     function isAttached(element) {
@@ -10024,7 +10024,7 @@ limitations under the License.
   var TransitionAnimator = Class.extend({
     push: function(enterPage, leavePage, callback) {
       callback();
-    }, 
+    },
 
     pop: function(enterPage, leavePage, callback) {
       callback();
@@ -10051,7 +10051,7 @@ limitations under the License.
             mask.remove();
             done();
           }),
-        
+
         animit(enterPage.pageElement[0])
           .queue({
             transform: 'translate3D(0, 100%, 0)'
@@ -10325,7 +10325,7 @@ limitations under the License.
 
       compile: function(element, attrs) {
         var content = element.addClass('ons-scroller').children().remove();
-        
+
         var wrapper = angular.element('<div></div>');
         wrapper.addClass('ons-scroller__content ons-scroller-inner');
         element.append(wrapper);
@@ -10519,7 +10519,7 @@ limitations under the License.
  * @param collapse
  *  [en]Specify the collapse behavior. Valid values are portrait, landscape, width ##px. "portrait" or "landscape" means the view will collapse when device is in landscape or portrait orientation. "width ##px" means the view will collapse when the window width is smaller than the specified ##px.[/en]
  *  [ja]左側のページを非表示にする条件を指定します。portrait, landscapeもしくはwidth ##pxの指定が可能です。portraitもしくはlandscapeを指定すると、デバイスの画面が縦向きもしくは横向きになった時に適用されます。width ##pxを指定すると、画面が指定した横幅よりも短い場合に適用されます。[/ja]
- * @param var 
+ * @param var
  *  [en]Variable name to refer this split view.[/en]
  *  [ja]JavaScriptからスプリットビューコンポーネントにアクセスするための変数を定義します。[/ja]
  *
@@ -11009,7 +11009,7 @@ limitations under the License.
 
       // NOTE: This element must coexists with ng-controller.
       // Do not use isolated scope and template's ng-transclde.
-      scope: true, 
+      scope: true,
       transclude: false,
 
       compile: function(element, attrs) {
@@ -11111,7 +11111,7 @@ limitations under the License.
   var module = angular.module('onsen');
 
   var ComponentCleaner = {
-    
+
     /**
      * @param {jqLite} element
      */
@@ -11454,7 +11454,7 @@ limitations under the License.
       function find(node) {
         if (node.children.length === 0) {
           return node.element;
-        } 
+        }
 
         if (node.children.length === 1) {
           return find(node.children[0]);
@@ -11590,7 +11590,7 @@ limitations under the License.
        */
       register: function(name, object) {
         this._getStack(name).push(object);
-        
+
         $onsen._defineVar(name, object);
       },
 
@@ -11722,7 +11722,7 @@ limitations under the License.
           deferred.resolve(this.normalizePageHTML(html));
 
           return deferred.promise;
-          
+
         } else {
           return $http({
             url: page,
@@ -11745,7 +11745,7 @@ limitations under the License.
         if (!html.match(/^<ons-page/)) {
           html = '<ons-page>' + html + '</ons-page>';
         }
-        
+
         return html;
       },
 
@@ -11753,7 +11753,7 @@ limitations under the License.
        * Create modifier templater function. The modifier templater generate css classes binded modifier name.
        *
        * @param {Object} attrs
-       * @return {Function} 
+       * @return {Function}
        */
       generateModifierTemplater: function(attrs) {
         var modifiers = attrs && typeof attrs.modifier === 'string' ? attrs.modifier.trim().split(/ +/) : [];
@@ -11853,7 +11853,7 @@ limitations under the License.
     };
 
     return $onsen;
-    
+
   }]);
 })();
 
@@ -12131,7 +12131,7 @@ window.animit = (function(){
     var styles = window.getComputedStyle(document.documentElement, ''),
       pre = (Array.prototype.slice
         .call(styles)
-        .join('') 
+        .join('')
         .match(/-(moz|webkit|ms)-/) || (styles.OLink === '' && ['', 'o'])
       )[1];
     return pre;
