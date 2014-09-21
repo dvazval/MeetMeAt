@@ -1,0 +1,21 @@
+<ons-navigator var="eventsNavigator">
+	<ons-page ng-controller="EventsListController">
+		<ons-toolbar>
+			<div class="center">
+				<img src="img/mini-logo.png" />
+			</div>
+		</ons-toolbar>
+		<div id="events">
+			<h2>Eventos</h2>
+			<div id="my-events-list" data-ng-init="loadEvents()">
+				<ons-scroller>
+					<ons-list class="events-list">
+						<ons-list-item class="event-list-item" modifier="tappable" ng-repeat="event in events">
+							 {{event.title}}
+						</ons-list-item>
+					</ons-list>
+				</ons-scroller>
+			<div>
+		</div>
+	</ons-page>
+</ons-navigator>

@@ -1,12 +1,14 @@
-//  __  __           _   __  __              _   
-// |  \/  |         | | |  \/  |        /\  | |  
-// | \  / | ___  ___| |_| \  / | ___   /  \ | |_ 
+//  __  __           _   __  __              _
+// |  \/  |         | | |  \/  |        /\  | |
+// | \  / | ___  ___| |_| \  / | ___   /  \ | |_
 // | |\/| |/ _ \/ _ \ __| |\/| |/ _ \ / /\ \| __|
-// | |  | |  __/  __/ |_| |  | |  __// ____ \ |_ 
+// | |  | |  __/  __/ |_| |  | |  __// ____ \ |_
 // |_|  |_|\___|\___|\__|_|  |_|\___/_/    \_\__|
 
+var app = app || null;
+
 (function($){
-    
+
     'use strict';
 
     /**
@@ -162,6 +164,9 @@
 
     // Onsen Ready
     ons.ready(function() {
+    	// Enable auto margin for the iOS status bar
+    	ons.enableAutoStatusBarFill();
+
     	// Tabbar change event
     	tabbar.on('postchange',function(event){
             app.modules.onTabChange.call(app.modules,event);
