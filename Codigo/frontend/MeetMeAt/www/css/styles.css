@@ -44,9 +44,43 @@ h1,h2 {
 	margin-top: 10px;
 }
 
+.ion-looping {
+	font-size: 60px;
+	color: #7C84AE;
+}
+
 /**
- * @module Events
+ * Components
  */
-.events-list {
+
+.loader.loading-in-progress,
+.items-list.loading-completed {
+	display: block;
+}
+
+.loader.loading-completed,
+.items-list.loading-in-progress {
+	display: none;
+}
+
+.items-list {
 	margin-top: 10px;
+}
+
+/**
+ * Login
+ */
+
+#login-page .ons-page-inner {
+	background: url('../img/login-background.jpg') no-repeat left top #000;
+	background-size: cover;
+	background-position: center;
+	padding: 30px;
+}
+
+#login-page p {
+	margin: 50px auto 60px;
+	color: #7C84AE;
+	width: 70%;
+	text-align: center;
 }

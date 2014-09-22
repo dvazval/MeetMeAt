@@ -1,0 +1,19 @@
+<ons-page id="friend-view-page" ng-controller="FriendViewController">
+    <ons-toolbar>
+        <div class="left"><ons-back-button>Back</ons-back-button></div>
+        <div class="center">
+        	<img src="img/mini-logo.png" />
+        </div>
+    </ons-toolbar>
+    <div id="my-friend-view">
+        <ons-row>
+            <ons-col>
+                <div id="friend-view" data-id="{{friend.id}}">
+                    <div id="friend-header">
+                        <h2>{{friend.name}}</h2>
+                    </div>
+                </div>
+            </ons-col>
+        </ons-row>
+    </div>
+</ons-page>

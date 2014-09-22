@@ -1,0 +1,24 @@
+<ons-navigator var="friendsNavigator">
+	<ons-page id="friends-page" ng-controller="FriendsController">
+		<ons-toolbar>
+			<div class="center">
+				<img src="img/mini-logo.png" />
+			</div>
+		</ons-toolbar>
+		<div id="my-friends">
+			<h2>Amigos</h2>
+			<div data-ng-init="loadEvents()">
+				<div class="loader" ng-class="loading">
+					<ons-icon class="ion-looping"></ons-icon>
+				</div>
+				<ons-scroller>
+					<ons-list class="friends-list items-list" ng-class="loading">
+						<ons-list-item class="friend-list-item" modifier="tappable" ng-repeat="friend in friends" ng-click="viewFriend($index)">
+							{{friend.name}}
+						</ons-list-item>
+					</ons-list>
+				</ons-scroller>
+			<div>
+		</div>
+	</ons-page>
+</ons-navigator>

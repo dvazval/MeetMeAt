@@ -1,0 +1,29 @@
+<ons-navigator var="eventsNavigator">
+	<ons-page id="events-page" ng-controller="EventsController">
+		<ons-toolbar>
+			<div class="center">
+				<img src="img/mini-logo.png" />
+			</div>
+			<div class="right">
+				<ons-toolbar-button ng-click="create()">
+					<ons-icon icon="ion-plus"></ons-icon>
+				</ons-toolbar-button></div>
+			</div>
+		</ons-toolbar>
+		<div id="my-events-list">
+			<h2>Eventos</h2>
+			<div data-ng-init="loadEvents()">
+				<div class="loader" ng-class="loading">
+					<ons-icon class="ion-looping"></ons-icon>
+				</div>
+				<ons-scroller>
+					<ons-list class="events-list items-list" ng-class="loading">
+						<ons-list-item class="event-list-item" modifier="tappable" ng-repeat="event in events" ng-click="view($index)">
+							{{event.title}}
+						</ons-list-item>
+					</ons-list>
+				</ons-scroller>
+			<div>
+		</div>
+	</ons-page>
+</ons-navigator>

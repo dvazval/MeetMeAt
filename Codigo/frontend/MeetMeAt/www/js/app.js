@@ -28,15 +28,28 @@ var rootNavigator = null;
 
    	// Authentication Service
    	module.factory('AuthenticationService', function() {
+   		var userData = null;
+
    		var AuthenticationService = {
+   			fbLogin : function() {
+   				var self = this;
+   				var $dfd = $.fblogin({ fbId: '839453376075539' });
+   				$dfd.done(function (data) {
+					userData = data;
+					self.route();
+				});
+   			},
    			isLogin : function() {
-   				return true;
+   				return (userData != null);
+   			},
+   			getUser : function() {
+   				return userData;
    			},
    			route : function() {
    				if (!this.isLogin()) {
 		    		rootNavigator.resetToPage('views/login.html');
 		    	} else {
-		    		rootNavigator.resetToPage('views/main.html');
+		    		rootNavigator.resetToPage('views/main.html', { animation: 'slide-left' });
 		    	}
    			}
    		};
@@ -125,6 +138,37 @@ var rootNavigator = null;
     	return EventsService;
     });
 
+    // Friends service
+    module.factory('FriendsService', function(ApiService){
+    	var friends = [],
+    		currentFriend = null,
+    		table = 'users';
+
+    	var FriendsService = {
+    		addFriend: function(friend) {
+    			friends.push(friend);
+    		},
+    		getFriends: function() {
+    			return friends;
+    		},
+    		load: function() {
+    			var self = this;
+    			friends = [];
+    			return ApiService.getAll(table, function(event) {
+    				self.addFriend(event);
+    			});
+    		},
+    		setCurrent: function(friend) {
+    			currentFriend = friend;
+    		},
+    		getCurrent: function() {
+    			return currentFriend;
+    		}
+    	};
+
+    	return FriendsService;
+    });
+
     /**
      * CONTROLLERS
      */
@@ -147,22 +191,36 @@ var rootNavigator = null;
     });
 
     // Login
-    module.controller('LoginController', function() {
+    module.controller('LoginController', function($scope, AuthenticationService) {
+    	$scope.fbLogin = function() {
+    		AuthenticationService.fbLogin();
+    	};
+    });
+
+    // Home
+    module.controller('HomeController', function() {
     	//
     });
 
     // Events list
-	module.controller('EventsListController', function($scope, EventsService) {
+	module.controller('EventsController', function($scope, EventsService) {
 		var navigator = eventsNavigator || null; // jshint ignore:line
+
+		$scope.loading = 'loading-in-progress';
 
 		EventsService.load().then(function(){
 			$scope.events = EventsService.getEvents();
+			$scope.loading = 'loading-completed';
 		});
 
-		$scope.viewEvent = function(index) {
+		$scope.view = function(index) {
 			var event = $scope.events[index];
 			EventsService.setCurrent(event);
 			navigator.pushPage('views/events/view.html', event);
+		};
+
+		$scope.create = function() {
+			navigator.pushPage('views/events/create.html');
 		};
 	});
 
@@ -170,6 +228,39 @@ var rootNavigator = null;
 	module.controller('EventViewController', function($scope, EventsService) {
 		$scope.event = EventsService.getCurrent();
 	});
+
+	// Event create
+    module.controller('EventCreateController', function() {
+    	//
+    });
+
+	// Friends
+    module.controller('FriendsController', function($scope, FriendsService) {
+    	var navigator = friendsNavigator || null; // jshint ignore:line
+
+    	$scope.loading = 'loading-in-progress';
+
+		FriendsService.load().then(function(){
+			$scope.friends = FriendsService.getFriends();
+			$scope.loading = 'loading-completed';
+		});
+
+		$scope.viewFriend = function(index) {
+			var friend = $scope.friends[index];
+			FriendsService.setCurrent(friend);
+			navigator.pushPage('views/friends/view.html', friend);
+		};
+    });
+
+    // Friend view
+	module.controller('FriendViewController', function($scope, FriendsService) {
+		$scope.friend = FriendsService.getCurrent();
+	});
+
+    // Profile
+    module.controller('ProfileController', function() {
+    	//
+    });
 
 	// Initialize
 	module.run(function() {
