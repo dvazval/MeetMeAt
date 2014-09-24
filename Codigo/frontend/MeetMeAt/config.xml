@@ -10,19 +10,7 @@
     <content src="index.html" />
     <access origin="*" />
 
-    <gap:plugin name="com.phonegap.plugin.statusbar" />
-    <preference name="StatusBarOverlaysWebView" value="false" />
-
-    <gap:config-file platform="ios" parent="UIStatusBarHidden">
-	    <true/>
-	</gap:config-file>
-
-	<gap:config-file platform="ios" parent="UIViewControllerBasedStatusBarAppearance">
-	    <false/>
-	</gap:config-file>
-
-	<feature name="StatusBar">
-        <param name="ios-package" value="CDVStatusBar" onload="true" />
-    </feature>
+    <preference name="fullscreen" value="true" />
+    <gap:plugin name="de.appplant.cordova.plugin.hidden-statusbar-overlay" />
 
 </widget>
