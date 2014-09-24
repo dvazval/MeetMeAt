@@ -8,6 +8,7 @@
 // dependencies
 var angular = angular || {},
 	ons = ons || {},
+	openFB = openFB || null,
 	console = console || {};
 
 // navigator (overwrite on page load)
@@ -28,16 +29,31 @@ var rootNavigator = null;
 
    	// Authentication Service
    	module.factory('AuthenticationService', function() {
-   		var userData = null;
+   		var userData = null,
+   			userType = 'fb';
 
    		var AuthenticationService = {
-   			fbLogin : function() {
+   			facebookLogin : function() {
    				var self = this;
-   				var $dfd = $.fblogin({ fbId: '839453376075539' });
-   				$dfd.done(function (data) {
-					userData = data;
-					self.route();
-				});
+   				openFB.init({appId:'839453376075539'});
+   				openFB.login(function(response) {
+	                if(response.status === 'connected') {
+	                    openFB.api({
+	                        path: '/me',
+	                        success: function(data) {
+	                            userData = data;
+	                            userType = 'fb';
+	                            self.route();
+	                        }
+	                    });
+	                }
+	            });
+   				// var $dfd = $.fblogin({ fbId: '839453376075539' });
+   				// $dfd.done(function (data) {
+				// 	userData = data;
+				// 	userType = 'fb';
+				// 	self.route();
+				// });
    			},
    			isLogin : function() {
    				return (userData != null);
@@ -192,8 +208,8 @@ var rootNavigator = null;
 
     // Login
     module.controller('LoginController', function($scope, AuthenticationService) {
-    	$scope.fbLogin = function() {
-    		AuthenticationService.fbLogin();
+    	$scope.facebookLogin = function() {
+    		AuthenticationService.facebookLogin();
     	};
     });
 
