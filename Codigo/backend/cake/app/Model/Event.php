@@ -7,8 +7,8 @@ class Event extends AppModel {
 	'User' => array(
 		'className' => 'User',
 		'joinTable' => 'users_events',
-		'foreignKey' => 'event_id',
-		'associationForeignKey' => 'user_id', 
+		'foreignKey' => 'events_id',
+		'associationForeignKey' => 'users_id', 
 		'unique' => false
 		),
 		
