@@ -55,6 +55,11 @@ var rootNavigator = null;
 				// 	self.route();
 				// });
    			},
+   			testLogin : function() {
+   				userData = { id: 0, name: "Test", email: "test@mail.com" };
+   				userType = 'custom';
+   				this.route();
+   			},
    			isLogin : function() {
    				return (userData != null);
    			},
@@ -80,9 +85,23 @@ var rootNavigator = null;
     			var method = (params && params.method) ? params.method : "GET",
     				webservice = endpoint + url;
     			console.log('Calling WebService [' + method + ':' + webservice + ']');
-    			var promise = $http({method:method, url: webservice}).then(function(response){
-    				return response.data;
-    			});
+    			var promise = null;
+    			try {
+    				promise = $http({method:method, url: webservice}).then(function(response){
+	    				return response.data;
+	    			}).fail(function(){
+	    				return { data: null };
+	    			});
+    			} catch(e) {
+    				var deferred = $q.defer();
+          			promise = deferred.promise;
+          			promise.then(function(){
+          				return { data: null };
+          			});
+          			setTimeout(function(){
+          				deferred.resolve();
+          			},100);
+    			}
     			return promise;
     		},
     		get: function(url) {
@@ -211,6 +230,9 @@ var rootNavigator = null;
     	$scope.facebookLogin = function() {
     		AuthenticationService.facebookLogin();
     	};
+    	$scope.testLogin = function() {
+    		AuthenticationService.testLogin();
+    	};
     });
 
     // Home
@@ -246,8 +268,10 @@ var rootNavigator = null;
 	});
 
 	// Event create
-    module.controller('EventCreateController', function() {
-    	//
+    module.controller('EventCreateController', function($scope) {
+    	$scope.createEvent = function() {
+    		console.log($scope);
+    	};
     });
 
 	// Friends

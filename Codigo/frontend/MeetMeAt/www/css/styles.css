@@ -33,6 +33,18 @@ h1,h2 {
 	margin-top: 10px;
 }
 
+form {
+	padding-bottom: 10px;
+}
+
+form section {
+	padding: 10px 0;
+}
+
+form ons-button.button {
+	margin-top: 10px;
+}
+
 /**
  * Onsen UI overwrites
  **/
@@ -52,6 +64,16 @@ h1,h2 {
 /**
  * Components
  */
+
+.link-list {
+	font-size: 12px;
+	margin: 10px auto;
+	display: block;
+	text-align: center;
+	color: #FFF;
+	text-transform: uppercase;
+	text-decoration: none;
+}
 
 .loader.loading-in-progress,
 .items-list.loading-completed {
