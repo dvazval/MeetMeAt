@@ -51,7 +51,7 @@ class PHPRestSQLRenderer {
     function database() {
         header('Content-Type: application/json');
         if (isset($this->PHPRestSQL->output['database'])) {
-					echo json_encode($this->PHPRestSQL->output['database']);
+					echo stripslashes(json_encode($this->PHPRestSQL->output['database']));
         } 
     }
     
@@ -61,7 +61,7 @@ class PHPRestSQLRenderer {
     function table() {
         header('Content-Type: application/json');
         if (isset($this->PHPRestSQL->output['table'])) {
-            echo 	json_encode($this->PHPRestSQL->output['table']);
+            echo 	stripslashes(json_encode($this->PHPRestSQL->output['table']));
         }
     }
     
@@ -71,7 +71,7 @@ class PHPRestSQLRenderer {
     function row() {
         header('Content-Type: application/json');
         if (isset($this->PHPRestSQL->output['row'])) {
-            echo 	json_encode($this->PHPRestSQL->output['row']);				
+            echo 	stripslashes(json_encode($this->PHPRestSQL->output['row']));				
         }
     }
 
