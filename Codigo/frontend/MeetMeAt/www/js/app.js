@@ -14,6 +14,10 @@ var angular = angular || {},
 // navigator (overwrite on page load)
 var rootNavigator = null;
 
+function getRandomArbitrary(min, max) {
+    return Math.random() * (max - min) + min;
+}
+
 (function(angular, ons){
 
     'use strict';
@@ -30,10 +34,42 @@ var rootNavigator = null;
      * SERVICES
      */
 
+    // User Service
+    module.factory('UserService', function() {
+    	var userData = null,
+   			userType = 'FB',
+   			access = null;
+
+   		var UserService = {
+   			isLogin : function() {
+   				return (userData != null);
+   			},
+   			isAuth : function() {
+   				return (access && access.private);
+   			},
+   			getUser : function() {
+   				userData.type = userType;
+   				return userData;
+   			},
+   			setUser : function(data) {
+   				userData = data;
+   			},
+   			setAccess : function(data) {
+   				if (data.id == userData.id) {
+   					access = data;
+   					console.log('Everything cool :)');
+   				}
+   			},
+   			getAccess : function() {
+   				return access;
+   			}
+   		};
+
+   		return UserService;
+    });
+
    	// Authentication Service
-   	module.factory('AuthenticationService', function() {
-   		var userData = null,
-   			userType = 'FB';
+   	module.factory('AuthenticationService', function(UserService, ApiService) { // jshint ignore:line
 
    		var AuthenticationService = {
    			facebookLogin : function() {
@@ -44,33 +80,34 @@ var rootNavigator = null;
 	                    openFB.api({
 	                        path: '/me',
 	                        success: function(data) {
-	                            userData = data;
-	                            self.route();
+	                        	data.type = "FB";
+	                        	UserService.setUser(data);
+	                            self.route(true);
 	                        }
 	                    });
 	                }
 	            });
-   				// var $dfd = $.fblogin({ fbId: '839453376075539' });
-   				// $dfd.done(function (data) {
-				// 	userData = data;
-				// 	userType = 'fb';
-				// 	self.route();
-				// });
    			},
    			testLogin : function() {
-   				userData = { id: 1, name: "User Pruebas", email: "pruebas@meetmeat.andreybolanos.com" };
-   				userType = 'Custom';
-   				this.route();
+   				UserService.setUser({ id: 1, name: "User Pruebas", email: "pruebas@meetmeat.andreybolanos.com", type: 'Custom' });
+   				this.route(true);
    			},
-   			isLogin : function() {
-   				return (userData != null);
-   			},
-   			getUser : function() {
-   				userData.type = userType;
-   				return userData;
-   			},
-   			route : function() {
-   				if (!this.isLogin()) {
+   			route : function(checkToken) {
+   				// var self = this;
+   				// Handshake! check token and wait for auth
+   				if (checkToken) {
+   					var access = UserService.getAccess();
+   					if (access == null) {
+   						// Enable handshake
+   						// ApiService.token().then(function(){
+   						// 	self.route(false);
+   						// });
+   						// return;
+   						UserService.setAccess({id:1,private:'t3s7'});
+   					}
+   				}
+   				// token OK so lets route
+   				if (!UserService.isLogin()) {
 		    		rootNavigator.resetToPage('views/login.html');
 		    	} else {
 		    		rootNavigator.resetToPage('views/main.html', { animation: 'slide-left' });
@@ -82,15 +119,48 @@ var rootNavigator = null;
    	});
 
     // Api Service
-    module.factory('ApiService', function($q, $http, endpoint, AuthenticationService) {
+    module.factory('ApiService', function($q, $http, endpoint, UserService) {
+
     	var ApiService = {
+    		token: function() {
+   				var user = UserService.getUser(),
+   					token = Math.floor(getRandomArbitrary(1,99999999999)),
+   					url = 'AuthCall.php?token=' + token + '&username=' + user.id;
+   				return this.request(url, { method: 'GET', type: 'auth' }).then(function(data){
+   					// transform access data into json
+   					var access_parts = data.split(",");
+   					var json = '{';
+   					for (var i=0; i<access_parts.length; i++) {
+   						var parts = access_parts[i].split("=");
+   						access_parts[i] = parts;
+   						json += '"' + parts[0] + '":"' + parts[1] + '"';
+   						if (i+1 != access_parts.length) {
+   							json += ',';
+   						}
+   					}
+   					json += '}';
+   					var jsonObj = jQuery.parseJSON(json);
+   					console.log('Authorized', access_parts, json, jsonObj);
+   					// store access token
+   					UserService.setAccess(jsonObj);
+   				});
+   			},
     		request: function(url, params) {
-    			var method = (params && params.method) ? params.method : "GET",
+    			// define parameters
+	    		var method = (params && params.method) ? params.method : "GET",
     				data = (params && params.data) ? params.data : null,
+    				type = (params && params.type) ? params.type : null,
     				webservice = endpoint + url;
-    			// always return json
-    			if (method == "GET") {
-    				webservice = webservice + '.json';
+    			// Check access always
+    			if (type != 'auth' && !UserService.isAuth()) {
+    				console.log('We are NOT authorized!');
+    				return;
+    			}
+    			// process expected data type
+    			switch(type) {
+    				case "json":
+    					webservice = webservice + '.json';
+    					break;
     			}
     			// process data
     			if (data) {
@@ -107,7 +177,7 @@ var rootNavigator = null;
     		},
     		post: function(url, obj) {
     			// append user id to create
-    			var user = AuthenticationService.getUser();
+    			var user = UserService.getUser();
     			obj.users_id = user.id;
     			// make call
     			return this.request(url, { method: 'POST', data: obj });
@@ -121,7 +191,7 @@ var rootNavigator = null;
     			return def.promise;
     		},
     		get: function(url) {
-    			return this.request(url, { method: 'GET' });
+    			return this.request(url, { method: 'GET', type: "json" });
     		},
     		getTable: function(name) {
     			return this.get(name);
@@ -296,7 +366,7 @@ var rootNavigator = null;
 
     	// Show initial view
     	ons.ready(function(){
-    		AuthenticationService.route();
+    		AuthenticationService.route(false);
     	});
     });
 
@@ -386,10 +456,10 @@ var rootNavigator = null;
 	});
 
     // Profile
-    module.controller('ProfileController', function($scope, AuthenticationService) {
+    module.controller('ProfileController', function($scope, UserService) {
     	var navigator = profileNavigator || null; // jshint ignore:line
 
-    	$scope.profile = AuthenticationService.getUser();
+    	$scope.profile = UserService.getUser();
     });
 
 	// Initialize
