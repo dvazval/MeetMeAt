@@ -345,7 +345,7 @@ ons-toolbar + .page__content {
   }
 }
 .navigation-bar__line-height {
-  line-height: 50px;
+  line-height: 40px;
   padding-bottom: 0;
   padding-top: 0;
 }
@@ -1585,6 +1585,9 @@ ons-toolbar + .page__content {
   font-size: 17px;
   transition: none;
   vertical-align: middle;
+  display: inline-block;
+  width: 30px;
+  text-align: center;
 }
 .toolbar-button:active,
 .toolbar-button--outline:active,

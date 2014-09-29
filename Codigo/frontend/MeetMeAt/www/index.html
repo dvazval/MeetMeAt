@@ -26,9 +26,9 @@
         <ons-navigator var="rootNavigator"></ons-navigator>
 
         <ons-modal var="modal">
-            <ons-icon id="modal-icon" spin="false"></ons-icon>
+            <ons-icon class="{{modal.icon}}" spin="false"></ons-icon>
             <br><br>
-            <span id="modal-label"></span>
+            <span>{{modal.message}}</span>
         </ons-modal>
 
         <!--cordova.js is automatically injected by the Cordova build process-->
@@ -36,20 +36,14 @@
 
         <!-- Scripts -->
         <script type="text/javascript">
-        	window.fbAsyncInit = function() {};
-			(function(d, s, id){
-			var js, fjs = d.getElementsByTagName(s)[0];
-			if (d.getElementById(id)) {return;}
-			js = d.createElement(s); js.id = id;
-			js.src = "//connect.facebook.net/es_LA/sdk.js";
-			fjs.parentNode.insertBefore(js, fjs);
-			}(document, 'script', 'facebook-jssdk'));
+        	window.fbAsyncInit = function(){};
 		</script>
 
+		<script id="facebook-jssdk" type="text/javascript" src="js/sdk.js"></script>
         <script type="text/javascript" src="js/lib/jquery.min.js"></script>
         <script type="text/javascript" src="js/lib/openfb/openfb.js"></script>
         <script type="text/javascript" src="js/lib/angular/angular.js"></script>
-        <script type="text/javascript" src="js/lib/onsen/onsenui.min.js"></script>
+        <script type="text/javascript" src="js/lib/onsen/onsenui.js"></script>
         <script type="text/javascript" src="js/app.js"></script>
     </body>
 </html>

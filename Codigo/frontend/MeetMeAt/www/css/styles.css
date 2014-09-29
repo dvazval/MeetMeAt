@@ -50,10 +50,15 @@ form ons-button.button {
  **/
 .page__content .page__content {
 	padding: 10px;
+	padding-top: 75px;
 }
 
 .row + .row {
 	margin-top: 10px;
+}
+
+.modal .modal__content ons-icon {
+	font-size: 30px;
 }
 
 .ion-looping {

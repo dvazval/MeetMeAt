@@ -22,6 +22,9 @@ var rootNavigator = null;
     var module = angular.module('meetmeat', ['onsen']);
     module.constant('appName', 'MeetMeAt');
     module.constant('endpoint', 'http://meetmeat.andreybolanos.com/rest/');
+    module.config(function($locationProvider) {
+    	$locationProvider.html5Mode(true);
+    });
 
     /**
      * SERVICES
@@ -30,7 +33,7 @@ var rootNavigator = null;
    	// Authentication Service
    	module.factory('AuthenticationService', function() {
    		var userData = null,
-   			userType = 'fb';
+   			userType = 'FB';
 
    		var AuthenticationService = {
    			facebookLogin : function() {
@@ -42,7 +45,6 @@ var rootNavigator = null;
 	                        path: '/me',
 	                        success: function(data) {
 	                            userData = data;
-	                            userType = 'fb';
 	                            self.route();
 	                        }
 	                    });
@@ -56,14 +58,15 @@ var rootNavigator = null;
 				// });
    			},
    			testLogin : function() {
-   				userData = { id: 0, name: "Test", email: "test@mail.com" };
-   				userType = 'custom';
+   				userData = { id: 1, name: "User Pruebas", email: "pruebas@meetmeat.andreybolanos.com" };
+   				userType = 'Custom';
    				this.route();
    			},
    			isLogin : function() {
    				return (userData != null);
    			},
    			getUser : function() {
+   				userData.type = userType;
    				return userData;
    			},
    			route : function() {
@@ -79,30 +82,43 @@ var rootNavigator = null;
    	});
 
     // Api Service
-    module.factory('ApiService', function($q, $http, endpoint) {
+    module.factory('ApiService', function($q, $http, endpoint, AuthenticationService) {
     	var ApiService = {
     		request: function(url, params) {
     			var method = (params && params.method) ? params.method : "GET",
+    				data = (params && params.data) ? params.data : null,
     				webservice = endpoint + url;
-    			console.log('Calling WebService [' + method + ':' + webservice + ']');
-    			var promise = null;
-    			try {
-    				promise = $http({method:method, url: webservice}).then(function(response){
-	    				return response.data;
-	    			}).fail(function(){
-	    				return { data: null };
-	    			});
-    			} catch(e) {
-    				var deferred = $q.defer();
-          			promise = deferred.promise;
-          			promise.then(function(){
-          				return { data: null };
-          			});
-          			setTimeout(function(){
-          				deferred.resolve();
-          			},100);
+    			// always return json
+    			if (method == "GET") {
+    				webservice = webservice + '.json';
     			}
+    			// process data
+    			if (data) {
+    				data =  decodeURIComponent(jQuery.param(data)).replace(/&/g,"\r\n");
+    			}
+    			// make call
+				console.log('Calling WebService',method,data,webservice);
+				var promise = $http({method: method, url: webservice, data: data})
+								.then(function(response){
+									console.log('Success Call',method,data,webservice,response);
+				    				return response.data;
+				    			});
     			return promise;
+    		},
+    		post: function(url, obj) {
+    			// append user id to create
+    			var user = AuthenticationService.getUser();
+    			obj.users_id = user.id;
+    			// make call
+    			return this.request(url, { method: 'POST', data: obj });
+    		},
+    		create: function(tableName, obj) {
+    			var def = $q.defer(),
+    				url = tableName;
+    			this.post(url, obj).then(function(id){
+    				def.resolve(id);
+    			});
+    			return def.promise;
     		},
     		get: function(url) {
     			return this.request(url, { method: 'GET' });
@@ -111,7 +127,11 @@ var rootNavigator = null;
     			return this.get(name);
     		},
     		getRow: function(tableName, id) {
-    			return this.get(tableName + '/' + id);
+    			var res = {};
+    			if (id) {
+    				res = this.get(tableName + '/' + id);
+    			}
+    			return res;
     		},
     		getAll: function(tableName, saveRowCallback) {
     			var def = $q.defer(),
@@ -149,6 +169,19 @@ var rootNavigator = null;
     		table = 'events';
 
     	var EventsService = {
+    		createEvent : function(event) {
+    			var self = this,
+    				def = $q.defer();
+    			// process dates
+    			event.startTime = event.date + " " + event.startTime + ":00";
+    			event.endTime = event.date + " " + event.endTime + ":00";
+    			// Call api
+    			ApiService.create(table, event).then(function(id) {
+    				self.addEvent(event);
+    				def.resolve(id);
+    			});
+    			return def.promise;
+    		},
     		addEvent: function(event) {
     			events.push(event);
     		},
@@ -204,6 +237,47 @@ var rootNavigator = null;
     	return FriendsService;
     });
 
+    // Modal service
+    module.factory('ModalService', function($rootScope) {
+    	var defaults = { message: '', icon: 'ion-sad' };
+
+    	var ModalService = {
+    		set: function(msg, icon) {
+    			$rootScope.modal.message = (msg) ? msg : defaults.message;
+	    		$rootScope.modal.icon = (icon) ? icon  : defaults.icon;
+    		},
+    		get: function() {
+    			return window.modal;
+    		},
+    		show: function() {
+    			this.get().show();
+	    	},
+	    	hide: function() {
+	    		this.get().hide();
+	    	},
+	    	critical: function(msg, icon) {
+				this.set(msg, icon);
+	    		this.show();
+	    	},
+	    	error: function(msg) {
+	    		this.notify(msg,'ion-sad');
+	    	},
+	    	success: function(msg) {
+	    		this.notify(msg, 'ion-happy');
+	    	},
+	    	notify: function(msg, icon) {
+	    		var self = this;
+	    		self.set(msg, icon);
+	    		self.show();
+	    		setTimeout(function(){
+	    			self.hide();
+	    		},3000);
+	    	}
+    	};
+
+    	return ModalService;
+    });
+
     /**
      * CONTROLLERS
      */
@@ -218,6 +292,7 @@ var rootNavigator = null;
 		// });
     	// $http.defaults.headers.common.Authorization = 'Basic YmVlcDpib29w'
     	$http.defaults.cache = true;
+    	$http.defaults.headers.post = { "Content-Type" : "text/plain" };
 
     	// Show initial view
     	ons.ready(function(){
@@ -268,9 +343,22 @@ var rootNavigator = null;
 	});
 
 	// Event create
-    module.controller('EventCreateController', function($scope) {
+    module.controller('EventCreateController', function($scope, EventsService, ModalService) {
+    	var navigator = eventsNavigator || null; // jshint ignore:line
+
+    	$scope.event = null;
+
     	$scope.createEvent = function() {
-    		console.log($scope);
+    		var form = $scope.createEventForm,
+    			event = $scope.event;
+    		if (form.$valid) {
+    			EventsService.createEvent(event).then(function(id){
+    				ModalService.success('Evento Creado #'+id);
+    				navigator.popPage();
+    			});
+    		} else {
+    			ModalService.error('Revisa el formulario');
+    		}
     	};
     });
 
@@ -298,13 +386,16 @@ var rootNavigator = null;
 	});
 
     // Profile
-    module.controller('ProfileController', function() {
-    	//
+    module.controller('ProfileController', function($scope, AuthenticationService) {
+    	var navigator = profileNavigator || null; // jshint ignore:line
+
+    	$scope.profile = AuthenticationService.getUser();
     });
 
 	// Initialize
 	module.run(function() {
 		// Global settings
+
 	});
 
 })(angular, ons);
