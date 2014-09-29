@@ -9,7 +9,8 @@
 var angular = angular || {},
 	ons = ons || {},
 	openFB = openFB || null,
-	console = console || {};
+	console = console || {},
+	navigator = navigator || {};
 
 // navigator (overwrite on page load)
 var rootNavigator = null;
@@ -86,7 +87,7 @@ function getRandomArbitrary(min, max) {
 	                        }
 	                    });
 	                }
-	            });
+	            },{scope:'email,user_friends'}); // read_friendlists
    			},
    			testLogin : function() {
    				UserService.setUser({ id: 1, name: "User Pruebas", email: "pruebas@meetmeat.andreybolanos.com", type: 'Custom' });
@@ -103,7 +104,7 @@ function getRandomArbitrary(min, max) {
    						// 	self.route(false);
    						// });
    						// return;
-   						UserService.setAccess({id:1,private:'t3s7'});
+   						UserService.setAccess({ id: UserService.getUser().id, private: 't3s7' });
    					}
    				}
    				// token OK so lets route
@@ -190,16 +191,17 @@ function getRandomArbitrary(min, max) {
     			});
     			return def.promise;
     		},
-    		get: function(url) {
-    			return this.request(url, { method: 'GET', type: "json" });
+    		get: function(url, params) {
+    			var getParams = $.extend({}, { method: 'GET', type: "json" }, params);
+    			return this.request(url, getParams);
     		},
     		getTable: function(name) {
-    			return this.get(name);
+    			return this.get(name, { cache: false });
     		},
     		getRow: function(tableName, id) {
     			var res = {};
     			if (id) {
-    				res = this.get(tableName + '/' + id);
+    				res = this.get(tableName + '/' + id, { cache: true });
     			}
     			return res;
     		},
@@ -231,6 +233,30 @@ function getRandomArbitrary(min, max) {
     	};
     	return ApiService;
     });
+
+	// Home Feed Service
+	module.factory('HomeFeedService',function(UserService, ApiService) {
+		var feeds = [];
+
+		var HomeFeedService = {
+			getFeeds: function() {
+				return feeds;
+			},
+			addFeed: function(feed) {
+				feeds.push(feed);
+			},
+			load: function() {
+				var user = UserService.getUser(),
+					self = this;
+				feeds = [];
+				return ApiService.getAll('homeFeed/events/' + user.id, function(event) {
+					self.addFeed(event);
+				});
+			}
+		};
+
+		return HomeFeedService;
+	});
 
 	// Events service
     module.factory('EventsService', function($q, ApiService) {
@@ -277,10 +303,10 @@ function getRandomArbitrary(min, max) {
     });
 
     // Friends service
-    module.factory('FriendsService', function(ApiService){
+    module.factory('FriendsService', function($q, ApiService){ // jshint ignore:line
     	var friends = [],
     		currentFriend = null,
-    		table = 'users';
+    		table = 'users'; // jshint ignore:line
 
     	var FriendsService = {
     		addFriend: function(friend) {
@@ -290,11 +316,23 @@ function getRandomArbitrary(min, max) {
     			return friends;
     		},
     		load: function() {
-    			var self = this;
-    			friends = [];
-    			return ApiService.getAll(table, function(event) {
-    				self.addFriend(event);
+    			var def = $q.defer();
+    			// friends = [];
+    			// return ApiService.getAll(table, function(event) {
+    			// 	self.addFriend(event);
+    			// });
+    			openFB.api({
+    				path: '/me/friends', // friends using the app
+    				success: function(list) {
+    					console.log(list);
+    					def.resolve();
+    				},
+    				error: function(error) {
+    					console.log(error);
+    					def.reject();
+    				}
     			});
+    			return def.promise;
     		},
     		setCurrent: function(friend) {
     			currentFriend = friend;
@@ -348,6 +386,23 @@ function getRandomArbitrary(min, max) {
     	return ModalService;
     });
 
+    // Geolocation service
+    module.factory('GeolocationService', function() {
+    	var GeolocationService = {
+    		getPosition: function() {
+    			navigator.geolocation.getCurrentPosition(function(position){
+    				// success
+    				console.log(position);
+    			},function(error){
+    				// error
+    				console.log(error);
+    			});
+    		}
+    	};
+
+    	return GeolocationService;
+    });
+
     /**
      * CONTROLLERS
      */
@@ -381,13 +436,20 @@ function getRandomArbitrary(min, max) {
     });
 
     // Home
-    module.controller('HomeController', function() {
-    	//
+    module.controller('HomeController', function($scope, HomeFeedService) {
+    	var nav = homeNavigator || null; // jshint ignore:line
+
+    	$scope.loading = 'loading-in-progress';
+
+    	HomeFeedService.load().then(function(){
+    		$scope.feeds = HomeFeedService.getFeeds();
+    		$scope.loading = 'loading-completed';
+    	});
     });
 
     // Events list
 	module.controller('EventsController', function($scope, EventsService) {
-		var navigator = eventsNavigator || null; // jshint ignore:line
+		var nav = eventsNavigator || null; // jshint ignore:line
 
 		$scope.loading = 'loading-in-progress';
 
@@ -399,11 +461,11 @@ function getRandomArbitrary(min, max) {
 		$scope.view = function(index) {
 			var event = $scope.events[index];
 			EventsService.setCurrent(event);
-			navigator.pushPage('views/events/view.html', event);
+			nav.pushPage('views/events/view.html', event);
 		};
 
 		$scope.create = function() {
-			navigator.pushPage('views/events/create.html');
+			nav.pushPage('views/events/create.html');
 		};
 	});
 
@@ -414,7 +476,7 @@ function getRandomArbitrary(min, max) {
 
 	// Event create
     module.controller('EventCreateController', function($scope, EventsService, ModalService) {
-    	var navigator = eventsNavigator || null; // jshint ignore:line
+    	var nav = eventsNavigator || null; // jshint ignore:line
 
     	$scope.event = null;
 
@@ -424,7 +486,7 @@ function getRandomArbitrary(min, max) {
     		if (form.$valid) {
     			EventsService.createEvent(event).then(function(id){
     				ModalService.success('Evento Creado #'+id);
-    				navigator.popPage();
+    				nav.pushPage('views/events/activities.html');
     			});
     		} else {
     			ModalService.error('Revisa el formulario');
@@ -432,9 +494,14 @@ function getRandomArbitrary(min, max) {
     	};
     });
 
+    // Event Activities
+    module.controller('EventActivitiesController', function($scope) {
+    	var nav = eventsNavigator || null; // jshint ignore:line
+    });
+
 	// Friends
     module.controller('FriendsController', function($scope, FriendsService) {
-    	var navigator = friendsNavigator || null; // jshint ignore:line
+    	var nav = friendsNavigator || null; // jshint ignore:line
 
     	$scope.loading = 'loading-in-progress';
 
@@ -446,7 +513,7 @@ function getRandomArbitrary(min, max) {
 		$scope.viewFriend = function(index) {
 			var friend = $scope.friends[index];
 			FriendsService.setCurrent(friend);
-			navigator.pushPage('views/friends/view.html', friend);
+			nav.pushPage('views/friends/view.html', friend);
 		};
     });
 
@@ -457,7 +524,7 @@ function getRandomArbitrary(min, max) {
 
     // Profile
     module.controller('ProfileController', function($scope, UserService) {
-    	var navigator = profileNavigator || null; // jshint ignore:line
+    	var nav = profileNavigator || null; // jshint ignore:line
 
     	$scope.profile = UserService.getUser();
     });

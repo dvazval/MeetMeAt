@@ -6,8 +6,16 @@
 			</div>
 		</ons-toolbar>
 		<div id="home">
-			<div id="home-feed" class="events-list items-list">
-				Loading...
+			<h2>Donde?</h2>
+			<div data-ng-init="loadFeed()">
+				<div class="loader" ng-class="loading">
+					<ons-icon class="ion-looping"></ons-icon>
+				</div>
+				<ons-scroller>
+					<div class="feed-list-item" ng-repeat="feed in feeds">
+						{{event.title}}
+					</div>
+				</ons-scroller>
 			</div>
 		</div>
 	</ons-page>
