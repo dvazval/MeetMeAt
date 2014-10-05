@@ -76,6 +76,15 @@ class PHPRestSQL {
      * Type of display, database, table or row.
      */
     var $display = NULL;
+	
+	var $tipoConsulta = NULL;
+	
+	var $pkid = NULL;
+	
+	
+	var $userID = NULL;
+	var $PublicKey = NULL;
+	var $PrivateKey = NULL;
     
     /**
      * Constructor. Parses the configuration file "phprestsql.ini", grabs any request data sent, records the HTTP
@@ -84,9 +93,9 @@ class PHPRestSQL {
      */
     function PHPRestSQL($iniFile = 'phprestsql.ini') {
         $this->config = parse_ini_file($iniFile, TRUE);
-        
+		
         if (isset($_SERVER['REQUEST_URI']) && isset($_SERVER['REQUEST_METHOD'])) {
-        
+		        
             if (isset($_SERVER['CONTENT_LENGTH']) && $_SERVER['CONTENT_LENGTH'] > 0) {
                 $this->requestData = '';
                 $httpContent = fopen('php://input', 'r');
@@ -107,25 +116,48 @@ class PHPRestSQL {
 			}
 			array_push($urlParts, $lastPart);
 			
+			
 			if (isset($urlParts[0]) && $urlParts[0] == '') {
 				array_shift($urlParts);
 			}
 			
-            if (isset($urlParts[0])) $this->table = $urlParts[0];
-            if (count($urlParts) > 1 && $urlParts[1] != '') {
-                array_shift($urlParts);
-                foreach ($urlParts as $uid) {
-                    if ($uid != '') {
-                        $this->uid[] = $uid;
-                    }
-                }
-            }
-            
-            $this->method = $_SERVER['REQUEST_METHOD'];
-            
+			if (isset($urlParts[0]) && $urlParts[0] == 'details') {
+				$this->tipoConsulta = 'details';
+				array_shift($urlParts);
+			}elseif (isset($urlParts[0]) && $urlParts[0] == 'homeFeed'){
+				$this->tipoConsulta = 'homeFeed';
+				array_shift($urlParts);
+			}
+			
+			if (isset($urlParts[0])) $this->table = $urlParts[0];
+			if (count($urlParts) > 1 && $urlParts[1] != '') {
+				array_shift($urlParts);
+				foreach ($urlParts as $uid) {
+					if ($uid != '') {
+						$this->uid[] = $uid;
+						$this->pkid = $uid;
+					}
+				}
+			}
+			
+			$this->method = $_SERVER['REQUEST_METHOD'];			
+			
         }
     }
-    
+	
+	function authenticate(){
+		$this->connect();
+		$PublicKey = $_GET['public'];
+		$PrivateKey = $this->getprivateKey($PublicKey);
+		//echo hash_hmac( 'sha256' , $PublicKey . $PrivateKey, $PrivateKey);
+		if (hash_hmac( 'sha256' , $PublicKey . $PrivateKey, $PrivateKey) == $_GET['data']){
+			return true;
+		}else {
+			 return false;
+		}
+	}
+	
+	
     /**
      * Connect to the database.
      */
@@ -154,10 +186,15 @@ class PHPRestSQL {
      * Execute the request.
      */
     function exec() {
-        
         $this->connect();
-        
-        switch ($this->method) {
+		if($this->tipoConsulta=='details' ){
+			$this->output['row'] = $this->getDetails($this->table,$this->uid[0]);
+			$this->generateResponseData();
+		}elseif($this->tipoConsulta=='homeFeed'){
+			$this->output['row'] = $this->getUserEvents($this->uid[0]);
+			$this->generateResponseData();
+		}else{
+			switch ($this->method) {
             case 'GET':
                 $this->get();
                 break;
@@ -170,10 +207,151 @@ class PHPRestSQL {
             case 'DELETE':
                 $this->delete();
                 break;
-        }
-   
+			}
+		}
         $this->db->close();
-        
+    }
+	
+	//                             
+	function getDetails($tempTabla,$tempId) {
+		$this->display = 'row';
+		$where = ''; 
+		switch ($tempTabla) {
+		case 'events_activities':
+			$where .= 'events_id = \''.$tempId.'\' ';
+			break;
+		default:
+			$where .= 'id = \''.$tempId.'\' ';
+		}
+		
+		
+		if ($this->tipoConsulta=='homeFeed'){
+			$where = 'users_id = \''.$tempId.'\' '; 
+		}
+	
+				
+		$resource = $this->db->getRow($tempTabla, $where);
+		if ($resource) {
+			if ($this->db->numRows($resource) > 0) {
+				$values = array();
+				while ($row = $this->db->row($resource)) {
+					$idTablaTemp= null;
+					foreach ($row as $column => $data) {
+						if (($column != 'events_id') or ($this->tipoConsulta=='homeFeed')){
+							$columnParts = explode('_', $column); 
+							if (count($columnParts) > 1){
+								if ($this->tipoConsulta=='homeFeed'){
+									if ($columnParts[0] != 'users'){
+										$field = array(
+										'field' => $column,
+										'value' => $data
+										);
+									}
+								}else {
+									$temp = stripslashes(json_encode($this->getDetails($columnParts[0],$data))); 
+									$field = array(
+									'field' => $column,
+									'value' => $temp
+									);								
+								}
+							}else{ 
+								$field = array(
+								'field' => $column,
+								'value' => $data
+								);
+							}
+						if (($tempTabla == 'events') && ($column == 'id')){
+								$idTablaTemp = $data;
+						}
+						if (substr($column, -strlen($this->config['database']['foreignKeyPostfix'])) == $this->config['database']['foreignKeyPostfix']) {
+							$field['xlink'] = $this->config['settings']['baseURL'].'/'.substr($column, 0, -strlen($this->config['database']['foreignKeyPostfix'])).'/'.$data;
+						}
+						if ($field!=null){
+							$values[] = $field;
+							$field= null;
+						}
+						}			
+					}
+					if (($tempTabla=='events')&&($this->tipoConsulta=='details')){
+						$temp2 = stripslashes(json_encode($this->getDetails('events_activities',$idTablaTemp)));
+						$field2 = array(
+						'field' => 'Actividades',
+						'value' => $temp2
+						);
+						$values[] = $field2;
+					}
+				}
+				return $values;
+			} else {
+				$this->notFound();
+			}
+		} else {
+			$this->unauthorized();
+		}
+    }	
+	
+	function getUserEvents($tempId) {
+		
+		$values = array();
+		$temp = stripslashes(json_encode($this->getDetails('events',$tempId)));
+		$field = array(
+		'field' => 'Host',
+		'value' => $temp
+		);
+		$values[] = $field;
+	
+		
+		$temp2 = stripslashes(json_encode($this->getDetails('users_events',$tempId)));
+		$field2 = array(
+		'field' => 'Invitado',
+		'value' => $temp2
+		);
+		$values[] = $field2;
+		
+		
+		return $values;
+    }
+	
+	
+	
+	
+	function getprivateKey($id) {
+		$primary = $this->db->getPrimaryKeys('auth');
+		if ($id && count($primary) == count($id)) { // get a row
+			$this->display = 'row';
+			$where = '';
+			foreach($primary as $key => $pri) {
+				$where .= $pri.' = \''.$id.'\' AND ';
+			}
+			$where = substr($where, 0, -5);
+			$resource = $this->db->getRow('auth', $where);
+			if ($resource) {
+				if ($this->db->numRows($resource) > 0) {
+					while ($row = $this->db->row($resource)) {
+						$values = array();
+						foreach ($row as $column => $data) {
+							$field = array(
+								'field' => $column,
+								'value' => $data
+							);
+							if (substr($column, -strlen($this->config['database']['foreignKeyPostfix'])) == $this->config['database']['foreignKeyPostfix']) {
+								$field['xlink'] = $this->config['settings']['baseURL'].'/'.substr($column, 0, -strlen($this->config['database']['foreignKeyPostfix'])).'/'.$data;
+							}
+							if ($column=='privateKey'){
+								return $data;
+							}	
+							$values[] = $field;
+						}
+						//$this->output['row'] = $values;
+					}
+					//$this->generateResponseData();
+				} else {
+					$this->notFound();
+				}
+			} else {
+				$this->unauthorized();
+			}
+		}
     }
 
     /**
@@ -330,6 +508,7 @@ class PHPRestSQL {
                 if ($resource) {
                     if ($this->db->numAffected() > 0) {
 						$this->created($this->config['settings']['baseURL'].'/'.$this->table.'/'.$this->db->lastInsertId().'/');
+						echo $this->db->lastInsertId();
                     } else {
                         $this->badRequest();
                     }
