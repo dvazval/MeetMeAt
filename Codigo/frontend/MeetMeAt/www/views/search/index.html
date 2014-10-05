@@ -37,7 +37,7 @@
 				</div>
 				<ons-scroller>
 					<ons-list class="search-list items-list" ng-class="loading">
-						<ons-list-item class="search-list-item" ng-repeat="result in results">
+						<ons-list-item class="search-list-item" modifier="tappable" ng-repeat="result in results" ng-click="view($index)">
 							{{result.venue.name}}
 						</ons-list-item>
 					</ons-list>

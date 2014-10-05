@@ -458,6 +458,11 @@ function getRandomArbitrary(min, max) {
 				zoom: 14,
 				draggable: true,
 				mapTypeId: google.maps.MapTypeId.ROADMAP
+	        },
+	        mapIcons = {
+	        	STAR: "http://mt.google.com/vt/icon/name=icons/spotlight/star_L_8x.png",
+	        	RED_DOT: "http://mt.google.com/vt/icon/name=icons/spotlight/measle_spotlight_L.png",
+	        	GREEN_DOT: "http://mt.google.com/vt/icon/name=icons/spotlight/measle_green_8px.png"
 	        };
 
 	    var MapService = {
@@ -482,7 +487,8 @@ function getRandomArbitrary(min, max) {
 		    		myPositionMarker = new google.maps.Marker({
 		    			map: map,
 		    			position: LatLng,
-		    			title: 'Mi posicion'
+		    			title: 'Mi posicion',
+		    			icon: mapIcons.STAR
 		    		});
 		    	});
 	    	},
@@ -508,7 +514,8 @@ function getRandomArbitrary(min, max) {
 	    			var marker = new google.maps.Marker({
 		    			map: map,
 		    			position: position,
-		    			title: place.venue.name
+		    			title: place.venue.name,
+		    			icon: mapIcons.RED_DOT
 		    		});
 					placesMarkers.push(marker);
 	    		}
@@ -520,7 +527,8 @@ function getRandomArbitrary(min, max) {
 
     // Foursquare Service
     module.factory('FoursquareService', function($q, ApiService, MapService) {
-    	var endpoint = "FourSquareCall.php";
+    	var endpoint = "FourSquareCall.php",
+    		currentVenue = null;
 
     	var FoursquareService = {
     		getVenues: function(params) {
@@ -544,6 +552,12 @@ function getRandomArbitrary(min, max) {
     				});
     			});
     			return def.promise;
+    		},
+    		setCurrent: function(venue) {
+    			currentVenue = venue;
+    		},
+    		getCurrent: function() {
+    			return currentVenue;
     		}
     	};
 
@@ -608,7 +622,7 @@ function getRandomArbitrary(min, max) {
 		$scope.view = function(index) {
 			var event = $scope.events[index];
 			EventsService.setCurrent(event);
-			nav.pushPage('views/events/view.html', event);
+			nav.pushPage('views/events/view.html');
 		};
 
 		$scope.create = function() {
@@ -713,7 +727,37 @@ function getRandomArbitrary(min, max) {
     		MapService.centerMyPosition();
     	};
     	$scope.locate();
+
+    	$scope.view = function(index) {
+    		var venue = $scope.results[index].venue;
+    		FoursquareService.setCurrent(venue);
+    		nav.pushPage('views/places/view.html');
+    	};
     });
+
+	// Places
+	module.controller('PlaceViewController', function($scope, FoursquareService) {
+		var venue = FoursquareService.getCurrent();
+
+		$scope.place = {
+			id: venue.id,
+			name: venue.name,
+			photo: venue.featuredPhotos.items[0].prefix + "200x200" + venue.featuredPhotos.items[0].suffix,
+			category: {
+				name: venue.categories[0].name,
+				icon: venue.categories[0].icon.prefix + "bg_32" + venue.categories[0].icon.suffix
+			},
+			rating: venue.rating,
+			price: {
+				currency: venue.price.currency,
+				message: venue.price.message
+			},
+			stats: {
+				checkins: venue.stats.checkinsCount,
+				tips: venue.stats.tipCount
+			}
+		};
+	});
 
 	// Friends
     module.controller('FriendsController', function($scope, FriendsService) {
@@ -729,7 +773,7 @@ function getRandomArbitrary(min, max) {
 		$scope.viewFriend = function(index) {
 			var friend = $scope.friends[index];
 			FriendsService.setCurrent(friend);
-			nav.pushPage('views/friends/view.html', friend);
+			nav.pushPage('views/friends/view.html');
 		};
     });
 

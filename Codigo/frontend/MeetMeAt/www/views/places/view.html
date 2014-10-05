@@ -1,0 +1,27 @@
+<ons-page id="place-view-page" ng-controller="PlaceViewController">
+    <ons-toolbar>
+        <div class="left"><ons-back-button>Back</ons-back-button></div>
+        <div class="center">
+        	<img src="img/big-logo.png" height="52px" />
+        </div>
+    </ons-toolbar>
+    <div id="fqr-place-view">
+        <ons-row>
+            <ons-col>
+                <div id="place-view" data-id="{{place.id}}">
+                    <div id="place-header" class="view-header">
+                    	<center><img class="thumb" ng-src="{{place.photo}}" width="150px" /></center>
+                        <h2>{{place.name}}</h2>
+                        <h6>{{place.category.name}} <img ng-src="{{place.category.icon}}" width="16px" /></h6>
+                    </div>
+                    <div id="place-content" class="view-content">
+                    	<p>Calificaci&oacute;n: {{place.rating}}</p>
+                    	<p>Precio: {{place.price.currency}} {{place.price.message}}</p>
+                    	<p>{{place.stats.checkins}} checkins | {{place.stats.tips}} tips</p>
+                    	<small>Powered by <ons-icon class="ion-social-foursquare-outline"></ons-icon> Foursquare</small>
+                    </div>
+                </div>
+            </ons-col>
+        </ons-row>
+    </div>
+</ons-page>

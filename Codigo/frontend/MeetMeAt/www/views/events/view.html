@@ -14,14 +14,16 @@
         <ons-row>
             <ons-col>
                 <div id="event-view" data-id="{{event.id}}">
-                    <div id="event-header">
+                    <div id="event-header" class="view-header">
+                    	<center><img class="thumb" ng-src="{{event.photo}}" width="150px" /></center>
                         <h2>{{event.title}}</h2>
-                        <h6>{{event.theme}}</h6>
+                        <h6>Tema: {{event.theme}}</h6>
                     </div>
-                    <div id="event-content">
-                        <p>Comienza: {{event.date}} {{event.startTime}}</p>
-                        <p>Termina: {{event.date}} {{event.endTime}}</p>
-                        <p class="description">{{event.description}}</p>
+                    <div id="event-content" class="view-content">
+                    	<h6>Fecha y hora</h6>
+                    	<p>{{event.date}} {{event.startTime}} - {{event.endTime}}</p>
+                    	<h6>Descripci&oacute;n</h6>
+                        <p>{{event.description}}</p>
                     </div>
                 </div>
             </ons-col>

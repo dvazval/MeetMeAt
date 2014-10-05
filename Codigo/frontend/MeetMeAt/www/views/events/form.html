@@ -52,13 +52,14 @@
         		<textarea class="textarea" ng-model="event.description" id="ev-description"></textarea>
         	</section>
         	<section>
-        		<label for="ev-budget">Presupuesto:</label>
+        		<label for="ev-budget">Presupuesto ($):</label>
         		<input type="number" class="text-input" ng-model="event.budget" id="ev-budget" />
         	</section>
         	<section class="form-actions" ng-if="form.isCreate">
         		<ons-button modifier="large" ng-click="formAction('create')">Crear evento</ons-button>
         	</section>
         	<section class="form-actions" ng-if="form.isEdit">
+        		<ons-button modifier="large--cta" ng-click="editActivities()">Editar Actividades</ons-button>
         		<ons-button modifier="large--cta" ng-click="formAction('delete')">Cancelar evento</ons-button>
         		<ons-button modifier="large" ng-click="formAction('update')">Salvar cambios</ons-button>
         	</section>
