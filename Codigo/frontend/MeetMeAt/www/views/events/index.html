@@ -18,7 +18,7 @@
 				</div>
 				<ons-scroller>
 					<ons-list class="events-list items-list" ng-class="loading">
-						<ons-list-item class="event-list-item" modifier="tappable" ng-repeat="event in events" ng-click="view($index)">
+						<ons-list-item class="event-list-item" ng-repeat="event in events" ng-click="view($index)" modifier="chevron">
 							{{event.title}}
 						</ons-list-item>
 					</ons-list>

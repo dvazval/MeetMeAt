@@ -6,8 +6,25 @@
         </div>
     </ons-toolbar>
     <div id="event-activities">
-    	<h2>Agregar actividades</h2>
+    	<h2>Actividades</h2>
     	<form name="eventActivitiesForm" id="event-activities-form" method="POST">
+    		<section>
+    			<div class="loader" ng-class="loading">
+					<ons-icon class="ion-looping"></ons-icon>
+				</div>
+    			<ons-scroller>
+					<ons-list class="activities-list items-list" ng-class="loading">
+						<ons-list-item class="activities-list-item" ng-repeat="activity in activities" ng-click="view($index)" modifier="chevron">
+							{{activity.name}}
+						</ons-list-item>
+					</ons-list>
+				</ons-scroller>
+    		</section>
+    		<section class="form-actions">
+        		<ons-button modifier="large--cta" ng-click="formAction('search')">Buscar actividad</ons-button>
+        		<ons-button modifier="large--cta" ng-click="formAction('create')">Crear actividad</ons-button>
+        		<ons-button modifier="large" ng-click="formAction('save')">Salvar cambios</ons-button>
+        	</section>
     	</form>
     </div>
 </ons-page>

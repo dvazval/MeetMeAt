@@ -34,6 +34,25 @@ function getRandomArbitrary(min, max) {
     });
 
     /**
+     * ENUMS
+     */
+    var EventAction = {
+		CREATE: 1,
+		EDIT: 2
+	};
+
+	var FormAction = {
+		CREATE: 'create',
+		DELETE: 'delete',
+		UPDATE: 'update'
+	};
+
+	var DateTransform = {
+		DB: 'db',
+		FORM: 'form'
+	};
+
+    /**
      * SERVICES
      */
 
@@ -192,6 +211,18 @@ function getRandomArbitrary(min, max) {
     			});
     			return def.promise;
     		},
+    		put: function(url, obj) {
+    			// make call
+    			return this.request(url, { method: 'PUT', data: obj });
+    		},
+    		update: function(tableName, obj) {
+    			var def = $q.defer(),
+    				url = rest + tableName + '/' + obj.id;
+    			this.put(url, obj).then(function(id){
+    				def.resolve(id);
+    			});
+				return def.promise;
+    		},
     		get: function(url, params) {
     			var getParams = $.extend({}, { method: 'GET', type: "json" }, params);
     			return this.request(url, getParams);
@@ -262,16 +293,6 @@ function getRandomArbitrary(min, max) {
 		return HomeFeedService;
 	});
 
-	var EventAction = {
-		CREATE: 1,
-		EDIT: 2
-	};
-
-	var DateTransform = {
-		DB: 'db',
-		FORM: 'form'
-	};
-
 	// Events service
     module.factory('EventsService', function($q, ApiService) {
     	var events = [],
@@ -306,6 +327,18 @@ function getRandomArbitrary(min, max) {
     			// Call api
     			ApiService.create(table, event).then(function(id) {
     				self.addEvent(event);
+    				def.resolve(id);
+    			});
+    			return def.promise;
+    		},
+    		updateEvent : function(event) {
+    			var self = this,
+    				def = $q.defer();
+    			// process dates
+    			event = self.dateTransform(event, DateTransform.DB);
+    			// Call api
+    			ApiService.update(table, event).then(function(id) {
+    				event = self.dateTransform(event, DateTransform.FORM);
     				def.resolve(id);
     			});
     			return def.promise;
@@ -666,13 +699,30 @@ function getRandomArbitrary(min, max) {
     		var form = $scope.eventForm,
     			event = $scope.event;
     		if (form.$valid) {
-    			EventsService.createEvent(event).then(function(id){
-    				ModalService.success('Evento Creado #'+id);
-    				nav.pushPage('views/events/activities.html');
-    			});
+
+    			switch (action) {
+    				case FormAction.CREATE:
+    					EventsService.createEvent(event).then(function(id){
+		    				ModalService.success('Evento Creado #'+id);
+		    				nav.pushPage('views/activities/form.html');
+		    			});
+    					break;
+    				case FormAction.DELETE:
+    					break;
+    				case FormAction.UPDATE:
+    					EventsService.updateEvent(event).then(function(id){
+		    				ModalService.success('Evento Actualizado #'+id);
+		    				nav.popPage();
+		    			});
+    					break;
+    			}
     		} else {
     			ModalService.error('Revisa el formulario');
     		}
+    	};
+
+    	$scope.editActivities = function() {
+    		nav.pushPage('views/activities/form.html');
     	};
     });
 
@@ -683,7 +733,7 @@ function getRandomArbitrary(min, max) {
 
     // Search
     module.controller('SearchController', function($scope, MapService, FoursquareService, ModalService){
-    	var nav = searchNavigator || null; // jshint ignore:line
+    	var nav = searchNavigator || eventsNavigator || null; // jshint ignore:line
 
     	$scope.loading = 'loading-on-hold';
 

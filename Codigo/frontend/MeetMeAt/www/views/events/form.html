@@ -9,7 +9,7 @@
     	<h2 ng-if="form.isCreate">Crear Evento</h2>
     	<h2 ng-if="form.isEdit">Editar Evento</h2>
         <form name="eventForm" id="event-form" method="POST">
-        	<input type="hidden" ng-model="event.id" id="ev-id" />
+        	<input type="hidden" ng-model="event.id" id="ev-id" ng-if="form.isEdit" />
         	<section>
         		<label for="ev-title">Titulo</label>
         		<input type="text" class="text-input" ng-model="event.title" id="ev-title" required="required" />
