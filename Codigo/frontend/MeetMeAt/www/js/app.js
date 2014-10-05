@@ -10,7 +10,7 @@ var angular = angular || {},
 	ons = ons || {},
 	openFB = openFB || null,
 	console = console || {},
-	navigator = navigator || {};
+	google = google || {};
 
 // navigator (overwrite on page load)
 var rootNavigator = null;
@@ -26,7 +26,9 @@ function getRandomArbitrary(min, max) {
 	// Initialize Angular
     var module = angular.module('meetmeat', ['onsen']);
     module.constant('appName', 'MeetMeAt');
-    module.constant('endpoint', 'http://meetmeat.andreybolanos.com/rest/');
+    module.constant('endpoint', 'http://meetmeat.andreybolanos.com/');
+    module.constant('rest','rest/');
+    module.constant('call','call/');
     module.config(function($locationProvider) {
     	$locationProvider.html5Mode(true);
     });
@@ -58,7 +60,6 @@ function getRandomArbitrary(min, max) {
    			setAccess : function(data) {
    				if (data.id == userData.id) {
    					access = data;
-   					console.log('Everything cool :)');
    				}
    			},
    			getAccess : function() {
@@ -120,13 +121,13 @@ function getRandomArbitrary(min, max) {
    	});
 
     // Api Service
-    module.factory('ApiService', function($q, $http, endpoint, UserService) {
+    module.factory('ApiService', function($q, $http, endpoint, rest, call, UserService) {
 
     	var ApiService = {
     		token: function() {
    				var user = UserService.getUser(),
    					token = Math.floor(getRandomArbitrary(1,99999999999)),
-   					url = 'AuthCall.php?token=' + token + '&username=' + user.id;
+   					url = rest + 'AuthCall.php?token=' + token + '&username=' + user.id;
    				return this.request(url, { method: 'GET', type: 'auth' }).then(function(data){
    					// transform access data into json
    					var access_parts = data.split(",");
@@ -168,10 +169,10 @@ function getRandomArbitrary(min, max) {
     				data =  decodeURIComponent(jQuery.param(data)).replace(/&/g,"\r\n");
     			}
     			// make call
-				console.log('Calling WebService',method,data,webservice);
+				console.log('Calling WebService', method, data, webservice);
 				var promise = $http({method: method, url: webservice, data: data})
 								.then(function(response){
-									console.log('Success Call',method,data,webservice,response);
+									console.log('Success Call', method, data, webservice, response);
 				    				return response.data;
 				    			});
     			return promise;
@@ -185,7 +186,7 @@ function getRandomArbitrary(min, max) {
     		},
     		create: function(tableName, obj) {
     			var def = $q.defer(),
-    				url = tableName;
+    				url = rest + tableName;
     			this.post(url, obj).then(function(id){
     				def.resolve(id);
     			});
@@ -195,13 +196,16 @@ function getRandomArbitrary(min, max) {
     			var getParams = $.extend({}, { method: 'GET', type: "json" }, params);
     			return this.request(url, getParams);
     		},
+    		call: function(url, params) {
+    			return this.request(call + url + '?' + jQuery.param(params), { method: 'GET' });
+    		},
     		getTable: function(name) {
-    			return this.get(name, { cache: false });
+    			return this.get(rest + name, { cache: false });
     		},
     		getRow: function(tableName, id) {
     			var res = {};
     			if (id) {
-    				res = this.get(tableName + '/' + id, { cache: true });
+    				res = this.get(rest + tableName + '/' + id, { cache: true });
     			}
     			return res;
     		},
@@ -258,19 +262,47 @@ function getRandomArbitrary(min, max) {
 		return HomeFeedService;
 	});
 
+	var EventAction = {
+		CREATE: 1,
+		EDIT: 2
+	};
+
+	var DateTransform = {
+		DB: 'db',
+		FORM: 'form'
+	};
+
 	// Events service
     module.factory('EventsService', function($q, ApiService) {
     	var events = [],
     		currentEvent = null,
-    		table = 'events';
+    		table = 'events',
+    		mode = null;
 
     	var EventsService = {
+    		dateTransform : function(event, transform) {
+    			switch (transform) {
+    				case DateTransform.DB:
+    					event.startTime = event.date + " " + event.startTime + ":00";
+    					event.endTime = event.date + " " + event.endTime + ":00";
+    					break;
+    				case DateTransform.FORM:
+    					var formRegex = /([0-9]{4})-([0-9]{2})-([0-9]{2})\s([0-9]{2}):([0-9]{2}):([0-9]{2})/,
+    						mst = event.startTime.match(formRegex),
+    						met = event.endTime.match(formRegex);
+    					if (mst != null && met != null) {
+    						event.startTime = mst[4] + ":" + mst[5] + ":" + mst[6];
+    						event.endTime = met[4] + ":" + met[5] + ":" + met[6];
+    					}
+    					break;
+    			}
+    			return event;
+    		},
     		createEvent : function(event) {
     			var self = this,
     				def = $q.defer();
     			// process dates
-    			event.startTime = event.date + " " + event.startTime + ":00";
-    			event.endTime = event.date + " " + event.endTime + ":00";
+    			event = self.dateTransform(event, DateTransform.DB);
     			// Call api
     			ApiService.create(table, event).then(function(id) {
     				self.addEvent(event);
@@ -292,10 +324,21 @@ function getRandomArbitrary(min, max) {
     			});
     		},
     		setCurrent: function(event) {
+    			if (event != null) {
+    				event = this.dateTransform(event, DateTransform.FORM);
+    				// FIX!
+    				event.photo = "img/party-thumb-big.jpg";
+    			}
     			currentEvent = event;
     		},
     		getCurrent: function() {
     			return currentEvent;
+    		},
+    		setMode: function(EventAction) {
+    			mode = EventAction;
+    		},
+    		getMode: function() {
+    			return mode;
     		}
     	};
 
@@ -387,20 +430,124 @@ function getRandomArbitrary(min, max) {
     });
 
     // Geolocation service
-    module.factory('GeolocationService', function() {
+    module.factory('GeolocationService', function($q) {
     	var GeolocationService = {
     		getPosition: function() {
-    			navigator.geolocation.getCurrentPosition(function(position){
-    				// success
-    				console.log(position);
-    			},function(error){
+    			var def = $q.defer();
+    			navigator.geolocation.getCurrentPosition(function(position) {
+    				// GetPosition object
+    				def.resolve(position);
+    			}, function(error) {
     				// error
-    				console.log(error);
+    				def.reject(error);
     			});
+    			return def.promise;
     		}
     	};
 
     	return GeolocationService;
+    });
+
+    // Map service
+    module.factory('MapService', function(GeolocationService) {
+    	var map = null,
+    		myPositionMarker = null,
+    		places = null,
+    		placesMarkers = [],
+    		mapOptions = {
+				zoom: 14,
+				draggable: true,
+				mapTypeId: google.maps.MapTypeId.ROADMAP
+	        };
+
+	    var MapService = {
+	    	setMap: function(id) {
+	    		map = new google.maps.Map(document.getElementById(id), mapOptions);
+	    	},
+	    	getMyPosition: function() {
+	    		return GeolocationService.getPosition();
+	    	},
+	    	centerMyPosition: function() {
+	    		this.getMyPosition().then(function(position) {
+					// Repostion map center
+		    		var LatLng = new google.maps.LatLng(position.coords.latitude,
+		    											position.coords.longitude);
+					map.setCenter(LatLng);
+					// Remove old position marker
+					if (myPositionMarker != null) {
+						myPositionMarker.setMap(null);
+						myPositionMarker = null;
+					}
+					// Create my position marker
+		    		myPositionMarker = new google.maps.Marker({
+		    			map: map,
+		    			position: LatLng,
+		    			title: 'Mi posicion'
+		    		});
+		    	});
+	    	},
+	    	foursquare: function(fqr) {
+	    		// Reposition map boundaries
+	    		var sw = new google.maps.LatLng(fqr.suggestedBounds.sw.lat,
+	    										fqr.suggestedBounds.sw.lng),
+	    			ne = new google.maps.LatLng(fqr.suggestedBounds.ne.lat,
+	    										fqr.suggestedBounds.ne.lng),
+	    			bounds = new google.maps.LatLngBounds(sw,ne);
+	    		map.fitBounds(bounds);
+	    		// Clean old markers
+	    		for (var j = 0; j < placesMarkers.length; j++) {
+	    			placesMarkers[j].setMap(null);
+	    		}
+	    		placesMarkers = [];
+	    		// Create new markers
+	    		places = fqr.groups[0].items;
+	    		for (var i = 0; i < places.length; i++) {
+	    			var place = places[i],
+	    				position = new google.maps.LatLng(place.venue.location.lat,
+	    												  place.venue.location.lng);
+	    			var marker = new google.maps.Marker({
+		    			map: map,
+		    			position: position,
+		    			title: place.venue.name
+		    		});
+					placesMarkers.push(marker);
+	    		}
+	    	}
+	    };
+
+    	return MapService;
+    });
+
+    // Foursquare Service
+    module.factory('FoursquareService', function($q, ApiService, MapService) {
+    	var endpoint = "FourSquareCall.php";
+
+    	var FoursquareService = {
+    		getVenues: function(params) {
+    			var def = $q.defer();
+    			MapService.getMyPosition().then(function(position){
+    				var others = {
+    					query: params.keywords,
+    					venuePhotos: 1
+    				};
+    				if (params.radius) {
+    					others.radius = params.radius;
+    				}
+    				var data = {
+    					lat: position.coords.latitude,
+    					long: position.coords.longitude,
+    					otros: jQuery.param(others)
+    				};
+    				ApiService.call(endpoint,data).then(function(fqr){
+    					MapService.foursquare(fqr.response);
+    					def.resolve(fqr.response);
+    				});
+    			});
+    			return def.promise;
+    		}
+    	};
+
+    	return FoursquareService;
     });
 
     /**
@@ -465,23 +612,44 @@ function getRandomArbitrary(min, max) {
 		};
 
 		$scope.create = function() {
-			nav.pushPage('views/events/create.html');
+			EventsService.setCurrent(null);
+			EventsService.setMode(EventAction.CREATE);
+			nav.pushPage('views/events/form.html');
 		};
 	});
 
 	// Event view
 	module.controller('EventViewController', function($scope, EventsService) {
+		var nav = eventsNavigator || null; // jshint ignore:line
+
 		$scope.event = EventsService.getCurrent();
+
+		$scope.edit = function() {
+			EventsService.setMode(EventAction.EDIT);
+			nav.pushPage('views/events/form.html');
+		};
 	});
 
-	// Event create
-    module.controller('EventCreateController', function($scope, EventsService, ModalService) {
+	// Event Form
+    module.controller('EventFormController', function($scope, EventsService, ModalService) {
     	var nav = eventsNavigator || null; // jshint ignore:line
 
-    	$scope.event = null;
+    	$scope.form = {};
 
-    	$scope.createEvent = function() {
-    		var form = $scope.createEventForm,
+    	if (EventsService.getMode() == EventAction.EDIT) {
+    		$scope.form.isCreate = false;
+    		$scope.event = EventsService.getCurrent();
+    		var photo = $scope.event.photo;
+    		$scope.event.hasPhoto = (photo !== "null" && photo !== null && photo !== "");
+    	} else {
+    		$scope.form.isCreate = true;
+    		$scope.event = {};
+    		$scope.event.hasPhoto = false;
+    	}
+    	$scope.form.isEdit = !$scope.form.isCreate;
+
+    	$scope.formAction = function(action) {
+    		var form = $scope.eventForm,
     			event = $scope.event;
     		if (form.$valid) {
     			EventsService.createEvent(event).then(function(id){
@@ -497,6 +665,54 @@ function getRandomArbitrary(min, max) {
     // Event Activities
     module.controller('EventActivitiesController', function($scope) {
     	var nav = eventsNavigator || null; // jshint ignore:line
+    });
+
+    // Search
+    module.controller('SearchController', function($scope, MapService, FoursquareService, ModalService){
+    	var nav = searchNavigator || null; // jshint ignore:line
+
+    	$scope.loading = 'loading-on-hold';
+
+    	$scope.results = {};
+    	$scope.distances = [
+    		{ name: '250mts', value: '250' },
+    		{ name: '500mts', value: '500' },
+    		{ name: '1km', value: '1000' },
+    		{ name: '2km', value: '2000' },
+    		{ name: '5km', value: '5000' },
+    	];
+    	$scope.search = {
+    		distance: $scope.distances[0].value
+    	};
+
+    	MapService.setMap('search-map');
+
+    	$scope.searchAction = function() {
+    		var form = $scope.searchForm,
+    			search = $scope.search;
+    		if (form.$valid) {
+    			$scope.loading = 'loading-in-progress';
+    			var params = {
+    				keywords: search.match,
+    				radius: search.distance
+    			};
+    			FoursquareService.getVenues(params).then(function(fqr){
+    				if (fqr.totalResults > 0) {
+    					$scope.results = fqr.groups[0].items;
+    				} else {
+    					ModalService.error('No hay lugares para el filtro y la distancia indicados');
+    				}
+    				$scope.loading = 'loading-completed';
+    			});
+    		} else {
+    			ModalService.error('¿Qué buscas?');
+    		}
+    	};
+
+    	$scope.locate = function() {
+    		MapService.centerMyPosition();
+    	};
+    	$scope.locate();
     });
 
 	// Friends

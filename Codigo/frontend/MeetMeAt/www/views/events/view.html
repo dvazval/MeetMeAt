@@ -4,6 +4,11 @@
         <div class="center">
         	<img src="img/big-logo.png" height="52px" />
         </div>
+        <div class="right">
+        	<ons-toolbar-button ng-click="edit()">
+				<ons-icon icon="ion-edit"></ons-icon>
+			</ons-toolbar-button></div>
+        </div>
     </ons-toolbar>
     <div id="my-event-view">
         <ons-row>
@@ -14,8 +19,8 @@
                         <h6>{{event.theme}}</h6>
                     </div>
                     <div id="event-content">
-                        <p>Comienza: {{event.startTime}}</p>
-                        <p>Termina: {{event.endTime}}</p>
+                        <p>Comienza: {{event.date}} {{event.startTime}}</p>
+                        <p>Termina: {{event.date}} {{event.endTime}}</p>
                         <p class="description">{{event.description}}</p>
                     </div>
                 </div>

@@ -1,0 +1,48 @@
+<ons-navigator var="searchNavigator">
+	<ons-page id="search-page" ng-controller="SearchController">
+		<ons-toolbar>
+			<div class="center">
+				<img src="img/big-logo.png" height="52px" />
+			</div>
+			<div class="right">
+				<ons-toolbar-button ng-click="locate()">
+					<ons-icon icon="ion-pinpoint"></ons-icon>
+				</ons-toolbar-button></div>
+			</div>
+		</ons-toolbar>
+		<div id="my-search">
+			<h2>¿Donde vamos?</h2>
+			<small>Powered by <ons-icon class="ion-social-foursquare-outline"></ons-icon> Foursquare</small>
+			<form name="searchForm" id="search-form" method="GET">
+				<section>
+	        		<ons-row>
+	        			<ons-col>
+	        				<input type="text" class="search-input" ng-model="search.match" id="search-field" required="required" />
+	        			</ons-col>
+	        			<ons-col width="10px"></ons-col>
+	        			<ons-col width="100px">
+	        				<select ng-model="search.distance" ng-options="distance.value as distance.name for distance in distances" class="select-input" required="required"></select>
+	        			</ons-col>
+	        			<ons-col width="10px"></ons-col>
+	        			<ons-col width="40px">
+	        				<ons-button ng-click="searchAction()"><ons-icon class="ion-search"></ons-icon></ons-button>
+	        			</ons-col>
+	        		</ons-row>
+	        	</section>
+			</form>
+			<div>
+				<div id="search-map"></div>
+				<div class="loader" ng-class="loading">
+					<ons-icon class="ion-looping"></ons-icon>
+				</div>
+				<ons-scroller>
+					<ons-list class="search-list items-list" ng-class="loading">
+						<ons-list-item class="search-list-item" ng-repeat="result in results">
+							{{result.venue.name}}
+						</ons-list-item>
+					</ons-list>
+				</ons-scroller>
+			</div>
+		</div>
+	</ons-page>
+</ons-navigator>

@@ -1,0 +1,67 @@
+<ons-page id="event-form-page" ng-controller="EventFormController">
+    <ons-toolbar>
+        <div class="left"><ons-back-button>Back</ons-back-button></div>
+        <div class="center">
+        	<img src="img/big-logo.png" height="52px" />
+        </div>
+    </ons-toolbar>
+    <div id="form-event">
+    	<h2 ng-if="form.isCreate">Crear Evento</h2>
+    	<h2 ng-if="form.isEdit">Editar Evento</h2>
+        <form name="eventForm" id="event-form" method="POST">
+        	<input type="hidden" ng-model="event.id" id="ev-id" />
+        	<section>
+        		<label for="ev-title">Titulo</label>
+        		<input type="text" class="text-input" ng-model="event.title" id="ev-title" required="required" />
+        	</section>
+        	<section>
+        		<label for="ev-theme">Tema</label>
+        		<input type="text" class="text-input" ng-model="event.theme" id="ev-theme" required="required" />
+        	</section>
+        	<section>
+        		<label for="ev-date">Fecha</label>
+        		<input type="date" class="text-input" ng-model="event.date" id="ev-date" required="required" />
+        	</section>
+        	<section>
+        		<ons-row>
+        			<ons-col>
+        				<label for="ev-starttime">Inicia</label>
+        				<input type="time" class="text-input" ng-model="event.startTime" id="ev-starttime" required="required" />
+        			</ons-col>
+        			<ons-col width="10px"></ons-col>
+        			<ons-col>
+        				<label for="ev-endtime">Fin:</label>
+        				<input type="time" class="text-input" ng-model="event.endTime" id="ev-endtime" required="required" />
+        			</ons-col>
+        		</ons-row>
+        	</section>
+        	<section>
+        		<ons-row>
+        			<ons-col>
+        				<label for="ev-photo">Foto:</label>
+        				<input type="file" class="text-input" ng-model="event.photoUpload" id="ev-photoUpload" accept="image/*" />
+        			</ons-col>
+        			<ons-col width="10px" ng-if="event.hasPhoto"></ons-col>
+        			<ons-col width="60px" ng-if="event.hasPhoto">
+        				<img ng-src="{{event.photo}}" id="ev-photo-thumb" class="thumb" width="60px" />
+        			</ons-col>
+        		</ons-row>
+        	</section>
+        	<section>
+        		<label for="ev-description">Descripcion:</label>
+        		<textarea class="textarea" ng-model="event.description" id="ev-description"></textarea>
+        	</section>
+        	<section>
+        		<label for="ev-budget">Presupuesto:</label>
+        		<input type="number" class="text-input" ng-model="event.budget" id="ev-budget" />
+        	</section>
+        	<section class="form-actions" ng-if="form.isCreate">
+        		<ons-button modifier="large" ng-click="formAction('create')">Crear evento</ons-button>
+        	</section>
+        	<section class="form-actions" ng-if="form.isEdit">
+        		<ons-button modifier="large--cta" ng-click="formAction('delete')">Cancelar evento</ons-button>
+        		<ons-button modifier="large" ng-click="formAction('update')">Salvar cambios</ons-button>
+        	</section>
+        </form>
+    </div>
+</ons-page>
