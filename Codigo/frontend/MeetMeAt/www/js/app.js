@@ -664,10 +664,10 @@ var rootNavigator = null;
 
     	$scope.loading = 'loading-in-progress';
 
-    	HomeFeedService.load().then(function(){
-    		$scope.feeds = HomeFeedService.getFeeds();
-    		$scope.loading = 'loading-completed';
-    	});
+    	// HomeFeedService.load().then(function(){
+    	// 	$scope.feeds = HomeFeedService.getFeeds();
+    	// 	$scope.loading = 'loading-completed';
+    	// });
     });
 
     // Events list
