@@ -71,7 +71,10 @@ class PHPRestSQLRenderer {
     function row() {
         header('Content-Type: application/json');
         if (isset($this->PHPRestSQL->output['row'])) {
-            echo 	stripslashes(json_encode($this->PHPRestSQL->output['row']));				
+			$temp = stripslashes(json_encode($this->PHPRestSQL->output['row']));
+			$temp = str_replace("\"[", "[",  $temp);
+			$temp = str_replace("]\"", "]",  $temp);
+            echo 	$temp;				
         }
     }
 

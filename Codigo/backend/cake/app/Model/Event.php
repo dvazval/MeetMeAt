@@ -15,8 +15,8 @@ class Event extends AppModel {
 	'Activity' => array(
 		'className' => 'Activity',
 		'joinTable' => 'events_activities',
-		'foreignKey' => 'event_id',
-		'associationForeignKey' => 'activity_id', 
+		'foreignKey' => 'events_id',
+		'associationForeignKey' => 'activities_id',  
 		'unique' => false
 		)
 	);

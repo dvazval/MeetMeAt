@@ -12,9 +12,7 @@ $context2  = stream_context_create($options2);
 $result2 = file_get_contents($url2, false, $context2);
 $dump = print_r($result2, true);
 
-echo $dump;
-
-if ($dump != 'false'){
+if ($dump != null){
 	echo $dump;
 }else {
 	$token = $facebookId;

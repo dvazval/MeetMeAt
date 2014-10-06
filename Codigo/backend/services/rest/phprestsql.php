@@ -127,9 +127,15 @@ class PHPRestSQL {
 			}elseif (isset($urlParts[0]) && $urlParts[0] == 'homeFeed'){
 				$this->tipoConsulta = 'homeFeed';
 				array_shift($urlParts);
+			}elseif (isset($urlParts[0]) && $urlParts[0] == 'facebookId'){
+				$this->tipoConsulta = 'facebookId';
+				array_shift($urlParts);
 			}
 			
-			if (isset($urlParts[0])) $this->table = $urlParts[0];
+			$tableName = explode('?', $urlParts[0]);
+			
+			
+			if (isset($urlParts[0])) $this->table = $tableName[0];
 			if (count($urlParts) > 1 && $urlParts[1] != '') {
 				array_shift($urlParts);
 				foreach ($urlParts as $uid) {
@@ -193,6 +199,10 @@ class PHPRestSQL {
 		}elseif($this->tipoConsulta=='homeFeed'){
 			$this->output['row'] = $this->getUserEvents($this->uid[0]);
 			$this->generateResponseData();
+		}elseif($this->tipoConsulta=='facebookId'){
+			//$this->output['row'] = $this->faceAuth($this->uid[0]);
+			//$this->generateResponseData();
+			$this->faceAuth($this->uid[0]);
 		}else{
 			switch ($this->method) {
             case 'GET':
@@ -212,6 +222,30 @@ class PHPRestSQL {
         $this->db->close();
     }
 	
+	function faceAuth($id){
+		//$where .= 'facebookId = \''.$id.'\' ';
+		$where .= 'auth_id = \''.$id.'\' ';
+		$resource = $this->db->getRow('users', $where);
+		if ($resource) {
+			if ($this->db->numRows($resource) > 0) {
+				while ($row = $this->db->row($resource)) {
+					foreach ($row as $column => $data) {
+						if ($column =="id"){
+							echo $data;
+						}
+					}
+				}
+			}
+			
+		}else
+			echo "false";
+			return false;
+	}
+	
+	
+				
+				
+				
 	//                             
 	function getDetails($tempTabla,$tempId) {
 		$this->display = 'row';
@@ -248,6 +282,7 @@ class PHPRestSQL {
 										);
 									}
 								}else {
+									
 									$temp = stripslashes(json_encode($this->getDetails($columnParts[0],$data))); 
 									$field = array(
 									'field' => $column,
@@ -291,7 +326,7 @@ class PHPRestSQL {
     }	
 	
 	function getUserEvents($tempId) {
-		
+		// 
 		$values = array();
 		$temp = stripslashes(json_encode($this->getDetails('events',$tempId)));
 		$field = array(
@@ -395,10 +430,20 @@ class PHPRestSQL {
                             while ($row = $this->db->row($resource)) {
                                 $values = array();
                                 foreach ($row as $column => $data) {
-                                    $field = array(
+                                    if ($column == 'photo'){
+										//echo $data;
+										$field = array(
+                                        'field' => $column,
+										//'value' => $data
+                                        'value' => base64_encode($data)
+										);
+									}else{
+										$field = array(
                                         'field' => $column,
                                         'value' => $data
-                                    );
+										);
+									}
+									
                                     if (substr($column, -strlen($this->config['database']['foreignKeyPostfix'])) == $this->config['database']['foreignKeyPostfix']) {
 										$field['xlink'] = $this->config['settings']['baseURL'].'/'.substr($column, 0, -strlen($this->config['database']['foreignKeyPostfix'])).'/'.$data;
                                     }

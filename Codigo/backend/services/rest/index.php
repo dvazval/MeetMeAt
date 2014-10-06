@@ -6,15 +6,14 @@ $PHPRestSQL =& new PHPRestSQL();
 
 $PHPRestSQL->exec();
 
-/* // Authentication
-if ( $PHPRestSQL->authenticate()){
+ // Authentication
+/*if ( $PHPRestSQL->authenticate()){
 	$PHPRestSQL->exec();
 }
 else{
 	echo "Wrong Authentication";
 }
 */
-
 
 
 /*

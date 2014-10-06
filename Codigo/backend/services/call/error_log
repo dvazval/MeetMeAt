@@ -1,0 +1,9 @@
+[02-Oct-2014 20:01:59 UTC] PHP Parse error:  syntax error, unexpected T_STRING, expecting ',' or ';' in /home/andreybs/public_html/meetmeat/call/MapsCall.php on line 44
+[02-Oct-2014 20:05:29 UTC] PHP Parse error:  syntax error, unexpected T_STRING, expecting ',' or ';' in /home/andreybs/public_html/meetmeat/call/MapsCall.php on line 30
+[03-Oct-2014 00:48:25 UTC] PHP Parse error:  syntax error, unexpected '}' in /home/andreybs/public_html/meetmeat/call/MapsCall.php on line 10
+[03-Oct-2014 01:05:04 UTC] PHP Parse error:  syntax error, unexpected T_ECHO, expecting ',' or ';' in /home/andreybs/public_html/meetmeat/call/MapsCall.php on line 18
+[03-Oct-2014 01:05:19 UTC] PHP Parse error:  syntax error, unexpected T_ECHO, expecting ',' or ';' in /home/andreybs/public_html/meetmeat/call/MapsCall.php on line 18
+[03-Oct-2014 01:05:35 UTC] PHP Parse error:  syntax error, unexpected T_ECHO, expecting ',' or ';' in /home/andreybs/public_html/meetmeat/call/MapsCall.php on line 18
+[03-Oct-2014 01:06:00 UTC] PHP Parse error:  syntax error, unexpected T_ECHO, expecting ',' or ';' in /home/andreybs/public_html/meetmeat/call/MapsCall.php on line 18
+[03-Oct-2014 01:49:15 UTC] PHP Parse error:  syntax error, unexpected '}', expecting ',' or ';' in /home/andreybs/public_html/meetmeat/call/MapsCall.php on line 23
+[03-Oct-2014 01:49:34 UTC] PHP Parse error:  syntax error, unexpected '}', expecting ',' or ';' in /home/andreybs/public_html/meetmeat/call/MapsCall.php on line 23
