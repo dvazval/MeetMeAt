@@ -7,13 +7,39 @@
 		</ons-toolbar>
 		<div id="home">
 			<h2>¿Donde nos vemos?</h2>
-			<div data-ng-init="loadFeed()">
+			<div id="home-feed">
 				<div class="loader" ng-class="loading">
 					<ons-icon class="ion-looping"></ons-icon>
 				</div>
 				<ons-scroller>
-					<div class="feed-list-item" ng-repeat="feed in feeds">
-						{{event.title}}
+					<div class="feed-item" ng-repeat="feed in feeds" ng-class="feed.hostInvite">
+						<ons-row>
+							<ons-col width="60px">
+								<img class="thumb" ng-src="{{feed.photo}}" width="60px" />
+							</ons-col>
+							<ons-col width="20px"></ons-col>
+							<ons-col>
+								<h6>{{feed.title}} - {{feed.theme}}</h6>
+								<small><i>FECHA: {{feed.date}} | HORA: {{feed.startTime}} - {{feed.endTime}}</i></small>
+								<p>{{feed.description}}</p>
+							</ons-col>
+						</ons-row>
+						<ons-row>
+							<ons-col>
+								<ons-button modifier="large"><ons-icon class="ion-social-foursquare"></ons-icon></ons-button>
+							</ons-col>
+							<ons-col ng-if="feed.hostInvite == 'Host'" width="1px"></ons-col>
+							<ons-col ng-if="feed.hostInvite == 'Host'">
+								<ons-button modifier="large"><ons-icon class="ion-camera"></ons-icon></ons-button>
+							</ons-col>
+							<ons-col width="1px"></ons-col>
+							<ons-col ng-if="feed.hostInvite == 'Invitado'">
+								<ons-button modifier="large--cta"><ons-icon class="ion-heart"></ons-icon></ons-button>
+							</ons-col>
+							<ons-col ng-if="feed.hostInvite == 'Host'">
+								<ons-button modifier="large--cta"><ons-icon class="ion-person"></ons-icon></ons-button>
+							</ons-col>
+						</ons-row>
 					</div>
 				</ons-scroller>
 			</div>

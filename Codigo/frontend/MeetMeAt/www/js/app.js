@@ -277,11 +277,7 @@ var rootNavigator = null;
     					var id = obj.value;
     					var idef = self.getRow(tableName, id).then(function(dataRow){
     						// transform api model to local model
-    						var row = {};
-    						dataRow.map(function(obj){
-    							row[obj.field] = obj.value;
-    						});
-    						dataRow = row;
+    						dataRow = self.transform(dataRow);
     						// return row
     						saveRowCallback(dataRow);
     					});
@@ -292,13 +288,20 @@ var rootNavigator = null;
 					});
     			});
     			return def.promise;
+    		},
+    		transform: function(data) {
+    			var t = {};
+    			data.map(function(obj){
+    				t[obj.field] = obj.value;
+    			});
+    			return t;
     		}
     	};
     	return ApiService;
     });
 
 	// Home Feed Service
-	module.factory('HomeFeedService',function(UserService, ApiService) {
+	module.factory('HomeFeedService',function($q, UserService, EventsService, ApiService, rest) {
 		var feeds = [];
 
 		var HomeFeedService = {
@@ -309,12 +312,30 @@ var rootNavigator = null;
 				feeds.push(feed);
 			},
 			load: function() {
-				var user = UserService.getUser(),
-					self = this;
+				var def = $q.defer();
+				// Get user
+				var user = UserService.getUser();
+				// Clean old feeds
 				feeds = [];
-				return ApiService.getAll('homeFeed/events/' + user.id, function(event) {
-					self.addFeed(event);
+				// API call
+				ApiService.get(rest + 'homeFeed/events/' + user.id, { cache: false}).then(function(response){
+					var rows = [];
+					angular.forEach(response, function(feedSet) {
+						angular.forEach(feedSet.value, function(feed) {
+							if (feed.field == "id" || feed.field == "events_id") {
+								var idef = EventsService.getById(feed.value).then(function(event){
+									event.hostInvite = feedSet.field;
+									feeds.push(event);
+								});
+								rows.push(idef);
+							}
+						});
+					});
+					$q.all(rows).then(function(){
+						def.resolve();
+					});
 				});
+				return def.promise;
 			}
 		};
 
@@ -372,7 +393,19 @@ var rootNavigator = null;
     			return def.promise;
     		},
     		addEvent: function(event) {
+    			event = this.photoFix(event);
     			events.push(event);
+    		},
+    		getById: function(id) {
+    			var def = $q.defer(),
+    				self = this;
+    			ApiService.getRow(table, id).then(function(event){
+    				event = ApiService.transform(event);
+    				event = self.dateTransform(event, DateTransform.FORM);
+					event = self.photoFix(event);
+    				def.resolve(event);
+    			});
+    			return def.promise;
     		},
     		getEvents: function() {
     			return events;
@@ -388,8 +421,6 @@ var rootNavigator = null;
     		setCurrent: function(event) {
     			if (event != null) {
     				event = this.dateTransform(event, DateTransform.FORM);
-    				// FIX!
-    				event.photo = "img/party-thumb-big.jpg";
     			}
     			currentEvent = event;
     		},
@@ -401,6 +432,11 @@ var rootNavigator = null;
     		},
     		getMode: function() {
     			return mode;
+    		},
+    		photoFix: function(event) {
+    			// FIX!
+    			event.photo = "img/party-thumb-big.jpg";
+    			return event;
     		}
     	};
 
@@ -664,10 +700,11 @@ var rootNavigator = null;
 
     	$scope.loading = 'loading-in-progress';
 
-    	// HomeFeedService.load().then(function(){
-    	// 	$scope.feeds = HomeFeedService.getFeeds();
-    	// 	$scope.loading = 'loading-completed';
-    	// });
+    	HomeFeedService.load().then(function(){
+			$scope.feeds = HomeFeedService.getFeeds();
+			console.log($scope.feeds);
+    		$scope.loading = 'loading-completed';
+    	});
     });
 
     // Events list

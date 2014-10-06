@@ -13,7 +13,7 @@
 				</div>
 				<ons-scroller>
 					<ons-list class="friends-list items-list" ng-class="loading">
-						<ons-list-item class="friend-list-item" ng-repeat="friend in friends" ng-click="viewFriend($index)" modifier="chevron">
+						<ons-list-item class="friend-list-item" ng-repeat="friend in friends" ng-click="viewFriend($index)" modifier="tappable">
 							{{friend.username}}
 						</ons-list-item>
 					</ons-list>
