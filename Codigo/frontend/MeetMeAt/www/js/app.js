@@ -10,14 +10,11 @@ var angular = angular || {},
 	ons = ons || {},
 	openFB = openFB || null,
 	console = console || {},
-	google = google || {};
+	google = google || {},
+	CryptoJS = CryptoJS || {};
 
 // navigator (overwrite on page load)
 var rootNavigator = null;
-
-function getRandomArbitrary(min, max) {
-    return Math.random() * (max - min) + min;
-}
 
 (function(angular, ons){
 
@@ -25,10 +22,14 @@ function getRandomArbitrary(min, max) {
 
 	// Initialize Angular
     var module = angular.module('meetmeat', ['onsen']);
+
+    // Constants
     module.constant('appName', 'MeetMeAt');
     module.constant('endpoint', 'http://meetmeat.andreybolanos.com/');
     module.constant('rest','rest/');
     module.constant('call','call/');
+
+    // Config
     module.config(function($locationProvider) {
     	$locationProvider.html5Mode(true);
     });
@@ -50,6 +51,12 @@ function getRandomArbitrary(min, max) {
 	var DateTransform = {
 		DB: 'db',
 		FORM: 'form'
+	};
+
+	var RestMethods = {
+		GET: 'GET',
+		POST: 'POST',
+		PUT: 'PUT'
 	};
 
     /**
@@ -90,8 +97,7 @@ function getRandomArbitrary(min, max) {
     });
 
    	// Authentication Service
-   	module.factory('AuthenticationService', function(UserService, ApiService) { // jshint ignore:line
-
+   	module.factory('AuthenticationService', function(UserService, ApiService) {
    		var AuthenticationService = {
    			facebookLogin : function() {
    				var self = this;
@@ -110,21 +116,21 @@ function getRandomArbitrary(min, max) {
 	            },{scope:'email,user_friends'}); // read_friendlists
    			},
    			testLogin : function() {
-   				UserService.setUser({ id: 1, name: "User Pruebas", email: "pruebas@meetmeat.andreybolanos.com", type: 'Custom' });
+   				UserService.setUser({ id: 1, name: "User Pruebas", email: "pruebas@meetmeat.andreybolanos.com", gender: 'unknown', type: 'Custom' });
+   				// UserService.setUser({ id: 10152701314367486, name: "Andrey Bolanos", email: "andreybs11@gmail.com", gender: 'male', type: 'FB' });
    				this.route(true);
    			},
    			route : function(checkToken) {
-   				// var self = this;
+   				var self = this;
    				// Handshake! check token and wait for auth
    				if (checkToken) {
    					var access = UserService.getAccess();
    					if (access == null) {
    						// Enable handshake
-   						// ApiService.token().then(function(){
-   						// 	self.route(false);
-   						// });
-   						// return;
-   						UserService.setAccess({ id: UserService.getUser().id, private: 't3s7' });
+   						ApiService.token().then(function(){
+   							self.route(false);
+   						});
+   						return;
    					}
    				}
    				// token OK so lets route
@@ -145,21 +151,23 @@ function getRandomArbitrary(min, max) {
     	var ApiService = {
     		token: function() {
    				var user = UserService.getUser(),
-   					token = Math.floor(getRandomArbitrary(1,99999999999)),
-   					url = rest + 'AuthCall.php?token=' + token + '&username=' + user.id;
-   				return this.request(url, { method: 'GET', type: 'auth' }).then(function(data){
+   					url = rest + 'AuthCall.php?facebookId=' + user.id;
+   				return this.request(url, { method: RestMethods.GET, type: 'auth', cache: false }).then(function(data){
    					// transform access data into json
-   					var access_parts = data.split(",");
-   					var json = '{';
-   					for (var i=0; i<access_parts.length; i++) {
-   						var parts = access_parts[i].split("=");
-   						access_parts[i] = parts;
-   						json += '"' + parts[0] + '":"' + parts[1] + '"';
-   						if (i+1 != access_parts.length) {
-   							json += ',';
-   						}
-   					}
-   					json += '}';
+   					// var access_parts = data.split(",");
+   					// var json = '{';
+   					// for (var i=0; i<access_parts.length; i++) {
+   					// 	var parts = access_parts[i].split("=");
+   					// 	access_parts[i] = parts;
+   					// 	json += '"' + parts[0] + '":"' + parts[1] + '"';
+   					// 	if (i+1 != access_parts.length) {
+   					// 		json += ',';
+   					// 	}
+   					// }
+   					// json += '}';
+   					// Testing authorization
+   					var access_parts = data;
+   					var json = '{ "id": "' + user.id  + '", "public": 1001, "private": "T3st", "message": "1001T3st" }';
    					var jsonObj = jQuery.parseJSON(json);
    					console.log('Authorized', access_parts, json, jsonObj);
    					// store access token
@@ -168,10 +176,11 @@ function getRandomArbitrary(min, max) {
    			},
     		request: function(url, params) {
     			// define parameters
-	    		var method = (params && params.method) ? params.method : "GET",
+	    		var method = (params && params.method) ? params.method : RestMethods.GET,
     				data = (params && params.data) ? params.data : null,
     				type = (params && params.type) ? params.type : null,
-    				webservice = endpoint + url;
+    				webservice = endpoint + url,
+    				getParams = {};
     			// Check access always
     			if (type != 'auth' && !UserService.isAuth()) {
     				console.log('We are NOT authorized!');
@@ -184,8 +193,27 @@ function getRandomArbitrary(min, max) {
     					break;
     			}
     			// process data
-    			if (data) {
+    			if (method == RestMethods.GET && data) {
+    				// data must be sent with break lines
     				data =  decodeURIComponent(jQuery.param(data)).replace(/&/g,"\r\n");
+    			}
+    			if (method == RestMethods.POST || method == RestMethods.PUT) {
+    				// data must be sent with break lines and not encoded
+    				data = decodeURIComponent(jQuery.param(data)).replace(/&/g,"\r\n").replace(/\+/g," ");
+    			}
+    			// authorization security
+	    			// if (type != 'auth' && method != RestMethods.GET) {
+	    			// 	var access = UserService.getAccess();
+		    		// 	getParams.public = access.public;
+	    			// }
+    			// encrypt data
+	    			// if (data != null) {
+	    			// 	data = CryptoJS.SHA256(data).toString();
+	    			// 	getParams.data = data;
+	    			// }
+    			// assembly webservice url
+    			if (!jQuery.isEmptyObject(getParams)) {
+    				webservice = webservice + "?" + jQuery.param(getParams);
     			}
     			// make call
 				console.log('Calling WebService', method, data, webservice);
@@ -201,7 +229,7 @@ function getRandomArbitrary(min, max) {
     			var user = UserService.getUser();
     			obj.users_id = user.id;
     			// make call
-    			return this.request(url, { method: 'POST', data: obj });
+    			return this.request(url, { method: RestMethods.POST, data: obj });
     		},
     		create: function(tableName, obj) {
     			var def = $q.defer(),
@@ -213,7 +241,7 @@ function getRandomArbitrary(min, max) {
     		},
     		put: function(url, obj) {
     			// make call
-    			return this.request(url, { method: 'PUT', data: obj });
+    			return this.request(url, { method: RestMethods.POST, data: obj });
     		},
     		update: function(tableName, obj) {
     			var def = $q.defer(),
@@ -224,11 +252,11 @@ function getRandomArbitrary(min, max) {
 				return def.promise;
     		},
     		get: function(url, params) {
-    			var getParams = $.extend({}, { method: 'GET', type: "json" }, params);
+    			var getParams = $.extend({}, { method: RestMethods.GET, type: "json" }, params);
     			return this.request(url, getParams);
     		},
     		call: function(url, params) {
-    			return this.request(call + url + '?' + jQuery.param(params), { method: 'GET' });
+    			return this.request(call + url + '?' + jQuery.param(params), { method: RestMethods.GET });
     		},
     		getTable: function(name) {
     			return this.get(rest + name, { cache: false });
@@ -353,6 +381,7 @@ function getRandomArbitrary(min, max) {
     			var self = this;
     			events = [];
     			return ApiService.getAll(table, function(event) {
+    				event.budget = parseFloat(event.budget);
     				self.addEvent(event);
     			});
     		},
@@ -379,7 +408,7 @@ function getRandomArbitrary(min, max) {
     });
 
     // Friends service
-    module.factory('FriendsService', function($q, ApiService){ // jshint ignore:line
+    module.factory('FriendsService', function($q){
     	var friends = [],
     		currentFriend = null,
     		table = 'users'; // jshint ignore:line
@@ -699,10 +728,18 @@ function getRandomArbitrary(min, max) {
     		var form = $scope.eventForm,
     			event = $scope.event;
     		if (form.$valid) {
-
+    			// prepare object
+    			var e = $.extend(true,{},event);
+    			delete e.hasPhoto;
+    			if (e.$$hashKey) { delete e.$$hashKey; }
+    			if (e.photoUpload) {
+    				e.photo = e.photoUpload;
+    				delete e.photoUpload;
+    			}
+    			// switch action
     			switch (action) {
     				case FormAction.CREATE:
-    					EventsService.createEvent(event).then(function(id){
+    					EventsService.createEvent(e).then(function(id){
 		    				ModalService.success('Evento Creado #'+id);
 		    				nav.pushPage('views/activities/form.html');
 		    			});
@@ -710,8 +747,9 @@ function getRandomArbitrary(min, max) {
     				case FormAction.DELETE:
     					break;
     				case FormAction.UPDATE:
-    					EventsService.updateEvent(event).then(function(id){
-		    				ModalService.success('Evento Actualizado #'+id);
+    					// trigger update
+    					EventsService.updateEvent(e).then(function(){
+		    				ModalService.success('Evento Actualizado');
 		    				nav.popPage();
 		    			});
     					break;
@@ -789,6 +827,8 @@ function getRandomArbitrary(min, max) {
 	module.controller('PlaceViewController', function($scope, FoursquareService) {
 		var venue = FoursquareService.getCurrent();
 
+		$scope.loading = 'loading-on-hold';
+
 		$scope.place = {
 			id: venue.id,
 			name: venue.name,
@@ -805,7 +845,8 @@ function getRandomArbitrary(min, max) {
 			stats: {
 				checkins: venue.stats.checkinsCount,
 				tips: venue.stats.tipCount
-			}
+			},
+			isSelectable: false
 		};
 	});
 

@@ -20,6 +20,9 @@
                     	<p>{{place.stats.checkins}} checkins | {{place.stats.tips}} tips</p>
                     	<small>Powered by <ons-icon class="ion-social-foursquare-outline"></ons-icon> Foursquare</small>
                     </div>
+                    <div class="view-actions" ng-if="place.isSelectable">
+                    	<ons-button modifier="large" ng-click="select()">Seleccionar</ons-button>
+                    </div>
                 </div>
             </ons-col>
         </ons-row>

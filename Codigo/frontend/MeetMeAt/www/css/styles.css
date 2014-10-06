@@ -106,6 +106,11 @@ form section {
 	text-decoration: none;
 }
 
+.loader {
+	text-align: center;
+	margin: 20px 0;
+}
+
 .loader.loading-in-progress,
 .items-list.loading-completed {
 	display: block;
@@ -160,4 +165,8 @@ form section {
 }
 .view-content {
 	text-align: center;
+}
+.view-actions {
+	margin-top: 30px;
+	margin-bottom: 20px;
 }
